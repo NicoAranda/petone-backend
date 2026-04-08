@@ -1,5 +1,7 @@
 package com.petone.users.ms_users.service;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -55,6 +57,17 @@ public class UserService{
         return userRepository.save(user);
     }
 
+    public List<User> viewAllUsers(){
+        return userRepository.findAll();
+    }
 
+    public User viewUserById(Long id){
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Usuario no encontrado"
+            ));
+        
+        return user;
+    }
 
 }
