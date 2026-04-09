@@ -26,7 +26,7 @@ public class UserService {
         if (dto.getNombre() == null || dto.getNombre().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El nombre del usuario es obligatorio");
         }
-        
+
         if (dto.getEmail() == null || dto.getEmail().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El email es obligatorio");
         }
@@ -93,12 +93,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User updateSaldo(Long id, Integer nuevaCantidad, String adminRol) {
-        // Verificación de seguridad manual (mientras no tengamos JWT configurado)
-        if (!"ADMIN".equalsIgnoreCase(adminRol)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No tienes permisos para modificar saldos");
-        }
-
+    public User updateSaldo(Long id, Integer nuevaCantidad) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 

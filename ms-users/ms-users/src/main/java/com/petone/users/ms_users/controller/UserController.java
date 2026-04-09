@@ -66,7 +66,7 @@ public class UserController {
         @RequestParam Integer nuevaCantidad, 
         @RequestParam String adminRol
     ){
-        User user = userService.updateSaldo(id, nuevaCantidad, adminRol);
+        User user = userService.updateSaldo(id, nuevaCantidad);
         return ResponseEntity.ok(user);
     }
 
