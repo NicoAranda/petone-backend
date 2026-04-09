@@ -3,9 +3,11 @@ package com.petone.users.ms_users.service;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.petone.users.ms_users.config.JwtService;
 import com.petone.users.ms_users.model.User;
 import com.petone.users.ms_users.repository.UserRepository;
 
@@ -16,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     public User addUser(User dto) {
 
@@ -53,7 +57,7 @@ public class UserService {
         User user = User.builder()
                 .nombre(dto.getNombre())
                 .email(dto.getEmail())
-                .password(dto.getPassword())
+                .password(passwordEncoder.encode(dto.getPassword()))
                 .rol(dto.getRol().toUpperCase())
                 .saldoMonedas(dto.getSaldoMonedas() != null ? dto.getSaldoMonedas() : 0)
                 .build();
@@ -111,6 +115,17 @@ public class UserService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
         userRepository.delete(user);
+    }
+
+    public String login(User dto) {
+        User user = userRepository.findByEmail(dto.getEmail())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales inválidas"));
+
+        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales inválidas");
+        }
+
+        return jwtService.generateToken(user);
     }
 
 }

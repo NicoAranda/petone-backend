@@ -1,5 +1,6 @@
 package com.petone.users.ms_users.controller;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -33,6 +34,12 @@ public class UserController {
     public ResponseEntity<User> registrar(@RequestBody User dto){
         User user = userService.addUser(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(user);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody User dto){
+        String token = userService.login(dto);
+        return ResponseEntity.ok(Collections.singletonMap("token", token));
     }
 
     @GetMapping
