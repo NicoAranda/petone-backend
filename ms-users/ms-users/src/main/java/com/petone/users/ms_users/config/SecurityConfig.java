@@ -25,10 +25,20 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/api/usuarios/login").permitAll() // Permitir login sin token
-                    .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll() // Permitir registro sin token
-                    .anyRequest().authenticated() // Bloquear todo lo demás
-            )
+            // Públicos
+            .requestMatchers("/api/usuarios/login").permitAll()
+            .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
+            
+            // Solo Administradores
+            .requestMatchers(HttpMethod.GET, "/api/usuarios").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.DELETE, "/api/usuarios/**").hasRole("ADMIN")
+            .requestMatchers("/api/usuarios/*/saldo").hasRole("ADMIN")
+            
+            .requestMatchers(HttpMethod.GET, "/api/usuarios/{id}").authenticated()
+            .requestMatchers(HttpMethod.PATCH, "/api/usuarios/{id}").authenticated()
+            
+            .anyRequest().authenticated()
+        )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
