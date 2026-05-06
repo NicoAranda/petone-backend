@@ -1,4 +1,4 @@
-package main.java.ms_publicacion.com.petone.publication.repository;
+package ms_publicacion.com.petone.publication.repository;
 
 import java.util.List;
 

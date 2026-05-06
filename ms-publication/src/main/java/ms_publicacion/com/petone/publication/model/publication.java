@@ -1,4 +1,4 @@
-package main.java.ms_publicacion.com.petone.publication.model;
+package ms_publicacion.com.petone.publication.model;
 
 import java.util.Date;
 import java.util.List;
