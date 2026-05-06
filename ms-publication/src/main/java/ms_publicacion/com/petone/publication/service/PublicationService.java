@@ -16,6 +16,41 @@ public class PublicationService {
     private final PublicationRepository repo;
 
     public Publication addPublication(Publication p) {
+        if (p == null) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST, "Publicación inválida");
+        }
+
+        if (p.getTipo() == null || p.getTipo().isBlank()) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST, "El tipo de publicación es obligatorio");
+        }
+
+        if (p.getTitulo() == null || p.getTitulo().isBlank()) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST, "El título es obligatorio");
+        }
+
+        if (p.getDescripcion() == null || p.getDescripcion().isBlank()) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST, "La descripción es obligatoria");
+        }
+
+        if (p.getUsuarioId() == null) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST, "El id del usuario es obligatorio");
+        }
+
+        // Default fechaPublicacion a ahora si no está seteada
+        if (p.getFechaPublicacion() == null) {
+            p.setFechaPublicacion(new java.util.Date());
+        }
+
+        // Estado por defecto
+        if (p.getEstado() == null || p.getEstado().isBlank()) {
+            p.setEstado("ACTIVA");
+        }
+
         return repo.save(p);
     }
 
@@ -25,7 +60,8 @@ public class PublicationService {
 
     public Publication viewById(Long id) {
         return repo.findById(id)
-            .orElseThrow(() -> new RuntimeException("Publicación no encontrada: " + id));
+            .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.NOT_FOUND, "Publicación no encontrada: " + id));
     }
 
     public List<Publication> viewByUsuarioId(Long usuarioId) {
