@@ -26,6 +26,9 @@ public class UserService {
         if (dto.getNombre() == null || dto.getNombre().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El nombre del usuario es obligatorio");
         }
+        if (dto.getApellido() == null || dto.getApellido().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El apellido del usuario es obligatorio");
+        }
 
         if (dto.getEmail() == null || dto.getEmail().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El email es obligatorio");
@@ -54,13 +57,27 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El rol debe ser ADMIN o CLIENTE");
         }
 
+        if (dto.getRut() == null || dto.getRut().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El rut es obligatorio");
+        }
+        if (userRepository.existsByRut(dto.getRut())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El rut ya está registrado");
+        }
+
+        if (dto.getTelefono() == null || dto.getTelefono().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El número de teléfono es obligatorio");
+        }
+
         User user = User.builder()
-                .nombre(dto.getNombre())
-                .email(dto.getEmail())
-                .password(passwordEncoder.encode(dto.getPassword()))
-                .rol(dto.getRol().toUpperCase())
-                .saldoMonedas(dto.getSaldoMonedas() != null ? dto.getSaldoMonedas() : 0)
-                .build();
+            .nombre(dto.getNombre())
+            .apellido(dto.getApellido())
+            .email(dto.getEmail())
+            .password(passwordEncoder.encode(dto.getPassword()))
+            .rol(dto.getRol().toUpperCase())
+            .saldoMonedas(dto.getSaldoMonedas() != null ? dto.getSaldoMonedas() : 0)
+            .rut(dto.getRut())
+            .telefono(dto.getTelefono())
+            .build();
 
         return userRepository.save(user);
     }
@@ -83,6 +100,8 @@ public class UserService {
 
         if (dto.getNombre() != null)
             user.setNombre(dto.getNombre());
+        if (dto.getApellido() != null)
+            user.setApellido(dto.getApellido());
         if (dto.getEmail() != null) {
             if (!dto.getEmail().equals(user.getEmail()) && userRepository.existsByEmail(dto.getEmail())) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Email ya en uso");
@@ -90,6 +109,16 @@ public class UserService {
             user.setEmail(dto.getEmail());
         }
 
+        if (dto.getRut() != null) {
+            if (!dto.getRut().equals(user.getRut()) && userRepository.existsByRut(dto.getRut())) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Rut ya en uso");
+            }
+            user.setRut(dto.getRut());
+        }
+
+        if (dto.getTelefono() != null) {
+            user.setTelefono(dto.getTelefono());
+        }
         return userRepository.save(user);
     }
 

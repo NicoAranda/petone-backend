@@ -11,4 +11,6 @@ import com.petone.users.ms_users.model.User;
 public interface UserRepository extends JpaRepository<User, Long>{
     boolean existsByEmail(String email);
     Optional<User> findByEmail(String email);
+    boolean existsByRut(String rut);
+    Optional<User> findByRut(String rut);
 }

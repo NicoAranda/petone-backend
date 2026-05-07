@@ -1,5 +1,6 @@
 package com.petone.users.ms_users.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,9 +22,13 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String nombre;
+    private String apellido;
     private String email;
     private String password;
     private String rol;
     private Integer saldoMonedas;
+    @Column(unique = true)
+    private String rut;
+    private String telefono;
 
 }
