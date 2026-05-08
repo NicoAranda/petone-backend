@@ -19,6 +19,28 @@ public class PublicationService {
     private final SupabaseStorageService storageService;
 
     public Publication addPublication(Publication p) {
+        if (p == null) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST, "Publicación inválida");
+        }
+
+
+        if (p.getDescripcion() == null || p.getDescripcion().isBlank()) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST, "La descripción es obligatoria");
+        }
+
+
+        // Default fechaPublicacion a ahora si no está seteada
+        if (p.getFechaPublicacion() == null) {
+            p.setFechaPublicacion(new java.util.Date());
+        }
+
+        // Estado por defecto
+        if (p.getEstado() == null || p.getEstado().isBlank()) {
+            p.setEstado("ACTIVA");
+        }
+
         return repo.save(p);
     }
 
