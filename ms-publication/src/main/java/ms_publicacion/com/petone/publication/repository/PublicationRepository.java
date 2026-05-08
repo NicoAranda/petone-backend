@@ -10,12 +10,4 @@ import ms_publicacion.com.petone.publication.model.Publication;
 @Repository
 public interface PublicationRepository extends JpaRepository<Publication, Long> {
 
-    List<Publication> findByUsuarioId(Long usuarioId);
-
-    List<Publication> findByMascotaId(Long mascotaId);
-
-    List<Publication> findByUbicacionId(Long ubicacionId);
-
-    List<Publication> findByEstado(String estado);
-
 }

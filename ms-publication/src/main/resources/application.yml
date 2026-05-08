@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: ms-publication
+
+  datasource:
+    url: jdbc:postgresql://db.rbefnfccpmtnyqblyzvv.supabase.co:5432/postgres?sslmode=require
+    username: postgres
+    password: petoneDB2026
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+supabase:
+  url: https://rbefnfccpmtnyqblyzvv.supabase.co
+  key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJiZWZuZmNjcG10bnlxYmx5enZ2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODI3MDg4OSwiZXhwIjoyMDkzODQ2ODg5fQ.nGq_7hTT5-kct__pNuk6bMykCO_ERSprijGyPer22gs
+  bucket: publicaciones

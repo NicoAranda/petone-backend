@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
+import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 
@@ -35,6 +37,29 @@ public class PublicationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(p);
     }
 
+    @PostMapping(value = "/con-imagenes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Publication> crearConImagenes(
+            @RequestParam String nombre,
+            @RequestParam String ubicacion,
+            @RequestParam String especie,
+            @RequestParam String sexo,
+            @RequestParam String estado,
+            @RequestParam String descripcion,
+            @RequestParam List<MultipartFile> fotos
+    ) {
+        Publication p = new Publication();
+        p.setNombre(nombre);
+        p.setUbicacion(ubicacion);
+        p.setEspecie(especie);
+        p.setSexo(sexo);
+        p.setEstado(estado);
+        p.setDescripcion(descripcion);
+        Publication saved = service.crearConImagenes(p, fotos);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(saved);
+    }
+
     @GetMapping
     public ResponseEntity<List<Publication>> listar() {
         return ResponseEntity.ok(service.viewAll());
@@ -43,26 +68,6 @@ public class PublicationController {
     @GetMapping("/{id}")
     public ResponseEntity<Publication> obtener(@PathVariable Long id) {
         return ResponseEntity.ok(service.viewById(id));
-    }
-
-    @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<List<Publication>> porUsuario(@PathVariable Long usuarioId) {
-        return ResponseEntity.ok(service.viewByUsuarioId(usuarioId));
-    }
-
-    @GetMapping("/mascota/{mascotaId}")
-    public ResponseEntity<List<Publication>> porMascota(@PathVariable Long mascotaId) {
-        return ResponseEntity.ok(service.viewByMascotaId(mascotaId));
-    }
-
-    @GetMapping("/ubicacion/{ubicacionId}")
-    public ResponseEntity<List<Publication>> porUbicacion(@PathVariable Long ubicacionId) {
-        return ResponseEntity.ok(service.viewByUbicacionId(ubicacionId));
-    }
-
-    @GetMapping("/estado")
-    public ResponseEntity<List<Publication>> porEstado(@RequestParam String estado) {
-        return ResponseEntity.ok(service.viewByEstado(estado));
     }
 
     @PutMapping("/{id}")

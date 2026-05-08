@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import lombok.RequiredArgsConstructor;
 
 import ms_publicacion.com.petone.publication.model.Publication;
@@ -14,9 +16,35 @@ import ms_publicacion.com.petone.publication.repository.PublicationRepository;
 public class PublicationService {
 
     private final PublicationRepository repo;
+    private final SupabaseStorageService storageService;
 
     public Publication addPublication(Publication p) {
         return repo.save(p);
+    }
+
+    public Publication crearConImagenes(
+            Publication dto,
+            List<MultipartFile> imagenes) {
+
+        try {
+
+            List<String> urls = imagenes.stream()
+                    .map(img -> {
+                        try {
+                            return storageService.uploadFile(img);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    })
+                    .toList();
+
+            dto.setFotos(urls);
+
+            return repo.save(dto);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error creando publicación");
+        }
     }
 
     public List<Publication> viewAll() {
@@ -25,35 +53,17 @@ public class PublicationService {
 
     public Publication viewById(Long id) {
         return repo.findById(id)
-            .orElseThrow(() -> new RuntimeException("Publicación no encontrada: " + id));
-    }
-
-    public List<Publication> viewByUsuarioId(Long usuarioId) {
-        return repo.findByUsuarioId(usuarioId);
-    }
-
-    public List<Publication> viewByMascotaId(Long mascotaId) {
-        return repo.findByMascotaId(mascotaId);
-    }
-
-    public List<Publication> viewByUbicacionId(Long ubicacionId) {
-        return repo.findByUbicacionId(ubicacionId);
-    }
-
-    public List<Publication> viewByEstado(String estado) {
-        return repo.findByEstado(estado);
+                .orElseThrow(() -> new RuntimeException("Publicación no encontrada: " + id));
     }
 
     public Publication updateById(Long id, Publication dto) {
         Publication existing = viewById(id);
-        existing.setTipo(dto.getTipo());
-        existing.setTitulo(dto.getTitulo());
-        existing.setDescripcion(dto.getDescripcion());
-        existing.setFechaPublicacion(dto.getFechaPublicacion());
+        existing.setNombre(dto.getNombre());
+        existing.setUbicacion(dto.getUbicacion());
+        existing.setEspecie(dto.getEspecie());
+        existing.setSexo(dto.getSexo());
         existing.setEstado(dto.getEstado());
-        existing.setMascotaId(dto.getMascotaId());
-        existing.setUsuarioId(dto.getUsuarioId());
-        existing.setUbicacionId(dto.getUbicacionId());
+        existing.setDescripcion(dto.getDescripcion());
         return repo.save(existing);
     }
 
