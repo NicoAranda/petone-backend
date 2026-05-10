@@ -62,6 +62,16 @@ public class PublicationService {
 
             dto.setFotos(urls);
 
+            // Default fechaPublicacion a ahora si no está seteada
+            if (dto.getFechaPublicacion() == null) {
+                dto.setFechaPublicacion(new java.util.Date());
+            }
+
+            // Estado por defecto
+            if (dto.getEstado() == null || dto.getEstado().isBlank()) {
+                dto.setEstado("ACTIVA");
+            }
+
             return repo.save(dto);
 
         } catch (Exception e) {
