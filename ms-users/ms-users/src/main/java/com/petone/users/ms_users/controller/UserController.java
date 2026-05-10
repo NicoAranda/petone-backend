@@ -36,6 +36,12 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 
+    @PostMapping("/registro-cliente")
+    public ResponseEntity<User> registrarCliente (@RequestBody User dto) {
+        User user = userService.registerClient(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(user);
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User dto){
         String token = userService.login(dto);
@@ -60,15 +66,15 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @PatchMapping("/{id}/saldo")
-    public ResponseEntity<User> actualizarSaldo(
-        @PathVariable Long id, 
-        @RequestParam Integer nuevaCantidad, 
-        @RequestParam String adminRol
-    ){
-        User user = userService.updateSaldo(id, nuevaCantidad);
-        return ResponseEntity.ok(user);
-    }
+    // @PatchMapping("/{id}/saldo")
+    // public ResponseEntity<User> actualizarSaldo(
+    //     @PathVariable Long id, 
+    //     @RequestParam Integer nuevaCantidad, 
+    //     @RequestParam String adminRol
+    // ){
+    //     User user = userService.updateSaldo(id, nuevaCantidad);
+    //     return ResponseEntity.ok(user);
+    // }
 
     @DeleteMapping("/{id}") 
     public ResponseEntity<Void> eliminarUsuario(@PathVariable Long id){

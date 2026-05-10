@@ -74,12 +74,18 @@ public class UserService {
             .email(dto.getEmail())
             .password(passwordEncoder.encode(dto.getPassword()))
             .rol(dto.getRol().toUpperCase())
-            .saldoMonedas(dto.getSaldoMonedas() != null ? dto.getSaldoMonedas() : 0)
+            // .saldoMonedas(dto.getSaldoMonedas() != null ? dto.getSaldoMonedas() : 0)
             .rut(dto.getRut())
             .telefono(dto.getTelefono())
             .build();
 
         return userRepository.save(user);
+    }
+
+    public User registerClient(User dto) {
+        dto.setRol("CLIENTE");
+
+        return addUser(dto);
     }
 
     public List<User> viewAllUsers() {
@@ -122,17 +128,17 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User updateSaldo(Long id, Integer nuevaCantidad) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+    // public User updateSaldo(Long id, Integer nuevaCantidad) {
+    //     User user = userRepository.findById(id)
+    //             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
-        if (nuevaCantidad == null || nuevaCantidad < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Saldo inválido");
-        }
+    //     if (nuevaCantidad == null || nuevaCantidad < 0) {
+    //         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Saldo inválido");
+    //     }
 
-        user.setSaldoMonedas(nuevaCantidad);
-        return userRepository.save(user);
-    }
+    //     user.setSaldoMonedas(nuevaCantidad);
+    //     return userRepository.save(user);
+    // }
 
     public void deleteUser(Long id) {
         User user = userRepository.findById(id)

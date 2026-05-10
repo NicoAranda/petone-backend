@@ -26,7 +26,7 @@ public class User {
     private String email;
     private String password;
     private String rol;
-    private Integer saldoMonedas;
+    // private Integer saldoMonedas;
     @Column(unique = true)
     private String rut;
     private String telefono;
