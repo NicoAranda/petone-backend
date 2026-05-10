@@ -70,11 +70,11 @@ public class PublicationService {
     }
 
     public List<Publication> viewAll() {
-        return repo.findAll();
+        return repo.findAllWithFotos();
     }
 
     public Publication viewById(Long id) {
-        return repo.findById(id)
+        return repo.findByIdWithFotos(id)
                 .orElseThrow(() -> new RuntimeException("Publicación no encontrada: " + id));
     }
 
