@@ -1,12 +1,9 @@
 import express from 'express'
-import multer from 'multer'
 
 const router = express.Router()
 
 const PUBLICATION_SERVICE = process.env.PUBLICATION_SERVICE || 'http://localhost:8080'
 const USER_SERVICE = process.env.USER_SERVICE || 'http://localhost:8081'
-
-const upload = multer({ storage: multer.memoryStorage() })
 
 const forwardHeaders = (req) => {
   const headers = {}
@@ -75,28 +72,23 @@ router.patch('/publicaciones/:id/reportar', async (req, res) => {
   }
 })
 
-// File upload proxy: accepts multipart/form-data with field 'fotos' and forwards to publication service
-router.post('/publicaciones/con-imagenes', upload.array('fotos'), async (req, res) => {
+// File upload proxy: forward multipart stream directly to publication service without parsing
+router.post('/publicaciones/con-imagenes', async (req, res) => {
   try {
-    const form = new FormData()
-    // append text fields
-    Object.keys(req.body || {}).forEach((key) => {
-      form.append(key, req.body[key])
-    })
+    // Forward original headers but remove host to avoid conflicts
+    const headers = { ...(req.headers || {}) }
+    delete headers.host
 
-    // append files (multer memoryStorage provides buffer)
-    if (req.files && Array.isArray(req.files)) {
-      req.files.forEach((file) => {
-        // Node's global FormData accepts Buffer and filename
-        form.append('fotos', file.buffer, file.originalname)
-      })
-    }
+    const resp = await fetchWithTimeout(`${PUBLICATION_SERVICE}/api/publicaciones/con-imagenes`, {
+      method: 'POST',
+      body: req,
+      headers,
+      duplex: 'half'
+    }, 20000)
 
-    const headers = { ...(req.headers.authorization ? { Authorization: req.headers.authorization } : {}) }
-
-    const resp = await fetchWithTimeout(`${PUBLICATION_SERVICE}/api/publicaciones/con-imagenes`, { method: 'POST', body: form, headers }, 20000)
-    const data = await resp.json()
-    if (!resp.ok) return res.status(resp.status).json(data)
+    // stream response back
+    const data = await resp.json().catch(() => null)
+    if (!resp.ok) return res.status(resp.status).json(data || { error: 'Upstream error' })
     return res.json(data)
   } catch (err) {
     console.error('bff POST /publicaciones/con-imagenes error', err?.message || err)
