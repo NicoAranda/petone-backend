@@ -35,6 +35,7 @@ public class Publication {
     private String especie;
     private String sexo;
     private String estado;
+    @Column(length = 2000)
     private String descripcion;
 
     @Temporal(TemporalType.TIMESTAMP)
@@ -43,6 +44,6 @@ public class Publication {
     // Lista de URLs de fotos asociadas a la publicación
     @ElementCollection
     @CollectionTable(name = "publicacion_fotos", joinColumns = @JoinColumn(name = "publication_id"))
-    @Column(name = "foto_url")
+    @Column(name = "foto_url", length = 1000)
     private List<String> fotos;
 }
