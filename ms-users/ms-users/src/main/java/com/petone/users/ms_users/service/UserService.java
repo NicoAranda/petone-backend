@@ -125,6 +125,11 @@ public class UserService {
         if (dto.getTelefono() != null) {
             user.setTelefono(dto.getTelefono());
         }
+
+        if (dto.getRol() != null && !dto.getRol().isBlank()) {
+            user.setRol(dto.getRol().toUpperCase());
+        }
+
         return userRepository.save(user);
     }
 
