@@ -72,6 +72,39 @@ router.patch('/publicaciones/:id/reportar', async (req, res) => {
   }
 })
 
+// Proxy para actualizar una publicación (PUT)
+router.put('/publicaciones/:id', async (req, res) => {
+  try {
+    const resp = await fetchWithTimeout(`${PUBLICATION_SERVICE}/api/publicaciones/${req.params.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...forwardHeaders(req) },
+      body: JSON.stringify(req.body)
+    })
+    const data = await resp.json()
+    if (!resp.ok) return res.status(resp.status).json(data)
+    return res.json(data)
+  } catch (err) {
+    console.error('bff PUT /publicaciones/:id error', err?.message || err)
+    return res.status(502).json({ error: 'Error updating publicación' })
+  }
+})
+
+// Proxy para eliminar una publicación (DELETE)
+router.delete('/publicaciones/:id', async (req, res) => {
+  try {
+    const resp = await fetchWithTimeout(`${PUBLICATION_SERVICE}/api/publicaciones/${req.params.id}`, {
+      method: 'DELETE',
+      headers: forwardHeaders(req)
+    })
+    const data = await resp.json().catch(() => null)
+    if (!resp.ok) return res.status(resp.status).json(data || { error: 'Upstream error' })
+    return res.json(data)
+  } catch (err) {
+    console.error('bff DELETE /publicaciones/:id error', err?.message || err)
+    return res.status(502).json({ error: 'Error deleting publicación' })
+  }
+})
+
 // File upload proxy: forward multipart stream directly to publication service without parsing
 router.post('/publicaciones/con-imagenes', async (req, res) => {
   try {
