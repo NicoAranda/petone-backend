@@ -105,6 +105,93 @@ router.delete('/publicaciones/:id', async (req, res) => {
   }
 })
 
+// Report routes proxy
+router.get('/reportes', async (req, res) => {
+  try {
+    const resp = await fetchWithTimeout(`${PUBLICATION_SERVICE}/api/reportes`, { headers: forwardHeaders(req) })
+    const data = await resp.json()
+    if (!resp.ok) return res.status(resp.status).json(data)
+    return res.json(data)
+  } catch (err) {
+    console.error('bff GET /reportes error', err?.message || err)
+    return res.status(502).json({ error: 'Error fetching reportes' })
+  }
+})
+
+router.get('/reportes/:id', async (req, res) => {
+  try {
+    const resp = await fetchWithTimeout(`${PUBLICATION_SERVICE}/api/reportes/${req.params.id}`, { headers: forwardHeaders(req) })
+    const data = await resp.json()
+    if (!resp.ok) return res.status(resp.status).json(data)
+    return res.json(data)
+  } catch (err) {
+    console.error('bff GET /reportes/:id error', err?.message || err)
+    return res.status(502).json({ error: 'Error fetching reporte' })
+  }
+})
+
+router.post('/reportes', async (req, res) => {
+  try {
+    const resp = await fetchWithTimeout(`${PUBLICATION_SERVICE}/api/reportes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...forwardHeaders(req) },
+      body: JSON.stringify(req.body)
+    })
+    const data = await resp.json()
+    if (!resp.ok) return res.status(resp.status).json(data)
+    return res.json(data)
+  } catch (err) {
+    console.error('bff POST /reportes error', err?.message || err)
+    return res.status(502).json({ error: 'Error creating reporte' })
+  }
+})
+
+router.put('/reportes/:id/estado', async (req, res) => {
+  try {
+    const resp = await fetchWithTimeout(`${PUBLICATION_SERVICE}/api/reportes/${req.params.id}/estado?nuevoEstado=${encodeURIComponent(req.query.nuevoEstado)}`, {
+      method: 'PUT',
+      headers: forwardHeaders(req)
+    })
+    const data = await resp.json()
+    if (!resp.ok) return res.status(resp.status).json(data)
+    return res.json(data)
+  } catch (err) {
+    console.error('bff PUT /reportes/:id/estado error', err?.message || err)
+    return res.status(502).json({ error: 'Error updating reporte estado' })
+  }
+})
+
+router.put('/reportes/:id/responder', async (req, res) => {
+  try {
+    const resp = await fetchWithTimeout(`${PUBLICATION_SERVICE}/api/reportes/${req.params.id}/responder`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...forwardHeaders(req) },
+      body: JSON.stringify(req.body)
+    })
+    const data = await resp.json()
+    if (!resp.ok) return res.status(resp.status).json(data)
+    return res.json(data)
+  } catch (err) {
+    console.error('bff PUT /reportes/:id/responder error', err?.message || err)
+    return res.status(502).json({ error: 'Error responding reporte' })
+  }
+})
+
+router.delete('/reportes/:id', async (req, res) => {
+  try {
+    const resp = await fetchWithTimeout(`${PUBLICATION_SERVICE}/api/reportes/${req.params.id}`, {
+      method: 'DELETE',
+      headers: forwardHeaders(req)
+    })
+    const data = await resp.json().catch(() => null)
+    if (!resp.ok) return res.status(resp.status).json(data || { error: 'Upstream error' })
+    return res.json(data)
+  } catch (err) {
+    console.error('bff DELETE /reportes/:id error', err?.message || err)
+    return res.status(502).json({ error: 'Error deleting reporte' })
+  }
+})
+
 // File upload proxy: forward multipart stream directly to publication service without parsing
 router.post('/publicaciones/con-imagenes', async (req, res) => {
   try {
