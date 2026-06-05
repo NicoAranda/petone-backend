@@ -5,8 +5,8 @@ spring:
   application:
     name: ms-users
   datasource:
-    url: jdbc:postgresql://db.tfglbsxvqtshorsvxrto.supabase.co:5432/postgres
-    username: postgres
+    url: jdbc:postgresql://aws-1-sa-east-1.pooler.supabase.com:5432/postgres
+    username: postgres.tfglbsxvqtshorsvxrto
     password: petoneDB2026
     driver-class-name: org.postgresql.Driver
   jpa:

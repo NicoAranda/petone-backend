@@ -6,8 +6,8 @@ spring:
     name: ms-publication
 
   datasource:
-    url: jdbc:postgresql://db.rbefnfccpmtnyqblyzvv.supabase.co:5432/postgres?sslmode=require
-    username: postgres
+    url: jdbc:postgresql://aws-1-us-west-1.pooler.supabase.com:5432/postgres?sslmode=require
+    username: postgres.rbefnfccpmtnyqblyzvv
     password: petoneDB2026
     driver-class-name: org.postgresql.Driver
 
