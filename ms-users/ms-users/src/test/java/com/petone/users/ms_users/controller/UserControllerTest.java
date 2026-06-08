@@ -30,7 +30,7 @@ public class UserControllerTest {
 
     @Test
     void listar_usuarios_devuelve_ok() {
-        User u = User.builder().id(1L).nombre("Juan").apellido("Perez").email("juan@example.com").build();
+        User u = User.builder().id(1L).nombre("Juan").apellido("Perez").email("juan@example.com").password("secret").rol("USER").rut("11111111-1").telefono("987654321").build();
         List<User> list = List.of(u);
         when(service.viewAllUsers()).thenReturn(list);
 
@@ -41,7 +41,7 @@ public class UserControllerTest {
 
     @Test
     void mostrar_usuario_por_id_devuelve_ok() {
-        User u = User.builder().id(2L).nombre("Ana").apellido("Lopez").email("ana@example.com").build();
+        User u = User.builder().id(2L).nombre("Ana").apellido("Lopez").email("ana@example.com").password("secret").rol("USER").rut("22222222-2").telefono("912345678").build();
         when(service.viewUserById(2L)).thenReturn(u);
 
         ResponseEntity<User> resp = controller.mostrarUsuario(2L);
@@ -51,8 +51,8 @@ public class UserControllerTest {
 
     @Test
     void actualizar_usuario_devuelve_ok() {
-        User input = User.builder().nombre("Pablo").apellido("Gomez").email("pablo@example.com").build();
-        User updated = User.builder().id(3L).nombre("Pablo").apellido("Gomez").email("pablo@example.com").build();
+        User input = User.builder().nombre("Pablo").apellido("Gomez").email("pablo@example.com").password("pass").rol("USER").rut("33333333-3").telefono("900900900").build();
+        User updated = User.builder().id(3L).nombre("Pablo").apellido("Gomez").email("pablo@example.com").password("pass").rol("USER").rut("33333333-3").telefono("900900900").build();
         when(service.updateUserById(3L, input)).thenReturn(updated);
 
         ResponseEntity<User> resp = controller.actualizarUsuario(3L, input);
