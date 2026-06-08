@@ -31,7 +31,6 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                // 👇 1. PERMITIR TODAS LAS PETICIONES OPTIONS (PREFLIGHT DE CORS) 👇
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/error").permitAll()
                 
@@ -41,6 +40,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
                 
                 // Solo Administradores
+                .requestMatchers(HttpMethod.GET, "/api/usuarios/me").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/usuarios").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/usuarios/**").hasRole("ADMIN")
                 .requestMatchers("/api/usuarios/*/saldo").hasRole("ADMIN")
@@ -61,8 +61,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // 👇 2. USAR PATTERNS PARA EVITAR PROBLEMAS DE SLASHES (/) 👇
-        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:5173", "http://localhost:5173/")); // <--- CAMBIO
+        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:5173", "http://localhost:5173/"));
         
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));

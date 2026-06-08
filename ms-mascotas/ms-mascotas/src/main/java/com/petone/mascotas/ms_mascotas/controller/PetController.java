@@ -53,6 +53,16 @@ public class PetController {
         return ResponseEntity.ok(pets);
     }
 
+    @GetMapping("/mis-mascotas")
+    public ResponseEntity<List<Pet>> listarMisMascotas(jakarta.servlet.http.HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        List<Pet> pets = petService.viewPetsByUsuarioId(userId);
+        return ResponseEntity.ok(pets);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<Pet> actualizarMascota(@PathVariable Long id, @RequestBody Pet dto){
         Pet pet = petService.updatePetById(id, dto);

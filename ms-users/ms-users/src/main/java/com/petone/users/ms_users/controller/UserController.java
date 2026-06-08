@@ -60,6 +60,26 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<User> obtenerMiPerfil(org.springframework.security.core.Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        
+        String email = authentication.getName();
+        // Buscamos al usuario por email
+        User user = userService.viewAllUsers().stream()
+                .filter(u -> u.getEmail().equals(email))
+                .findFirst()
+                .orElse(null);
+                
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        return ResponseEntity.ok(user);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<User> actualizarUsuario(@PathVariable Long id, @RequestBody User dto){
         User user = userService.updateUserById(id, dto);
