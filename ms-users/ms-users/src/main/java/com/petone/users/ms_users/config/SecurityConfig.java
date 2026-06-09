@@ -46,8 +46,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/usuarios/*/saldo").hasRole("ADMIN")
                 
                 // Usuarios Autenticados
-                .requestMatchers(HttpMethod.GET, "/api/usuarios/{id}").authenticated()
-                .requestMatchers(HttpMethod.PATCH, "/api/usuarios/{id}").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/usuarios/{id}").permitAll()
+                .requestMatchers(HttpMethod.PATCH, "/api/usuarios/{id}").permitAll()
                 
                 .anyRequest().authenticated()
             )

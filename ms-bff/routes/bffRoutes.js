@@ -26,13 +26,69 @@ const fetchWithTimeout = async (url, opts = {}, timeout = 8000) => {
 
 router.get('/publicaciones', async (req, res) => {
   try {
-    const resp = await fetchWithTimeout(`${PUBLICATION_SERVICE}/api/publicaciones`, { headers: forwardHeaders(req) })
-    const data = await resp.json()
-    if (!resp.ok) return res.status(resp.status).json(data)
-    return res.json(data)
+    const resp = await fetchWithTimeout(
+      `${PUBLICATION_SERVICE}/api/publicaciones`,
+      { headers: forwardHeaders(req) }
+    )
+    const publicaciones = await resp.json()
+    if (!resp.ok) {
+      return res.status(resp.status).json(publicaciones)
+    }
+    const publicacionesConUsuario = await Promise.all(
+      publicaciones.map(async (pub) => {
+        try {
+
+          const userResp = await fetchWithTimeout(
+            `${USER_SERVICE}/api/usuarios/${pub.userId}`,
+            { headers: forwardHeaders(req) }
+          )
+          if (!userResp.ok) {
+
+            console.log(
+              `Error usuario ${pub.userId}:`,
+              userResp.status
+            )
+
+            const text = await userResp.text()
+
+            console.log(text)
+
+            return {
+              ...pub,
+              usuario: null
+            }
+          }
+          const usuario = await userResp.json()
+          return {
+            ...pub,
+            usuario: {
+              id: usuario.id,
+              nombre: usuario.nombre,
+              apellido: usuario.apellido,
+              email: usuario.email
+            }
+          }
+        } catch (error) {
+          console.error(
+            `Error obteniendo usuario ${pub.userId}:`,
+            error.message
+          )
+          return {
+            ...pub,
+            usuario: null
+          }
+        }
+      })
+    )
+
+    return res.json(publicacionesConUsuario)
+
   } catch (err) {
     console.error('bff /publicaciones error', err?.message || err)
-    return res.status(502).json({ error: 'Error fetching publicaciones' })
+
+    return res.status(502).json({
+      error: 'Error fetching publicaciones'
+    })
   }
 })
 
