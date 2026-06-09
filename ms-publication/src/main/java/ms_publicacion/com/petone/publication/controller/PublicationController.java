@@ -18,8 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-
+import ms_publicacion.com.petone.publication.config.JwtService;
 import ms_publicacion.com.petone.publication.model.Publication;
 import ms_publicacion.com.petone.publication.service.PublicationService;
 
@@ -30,6 +31,7 @@ import ms_publicacion.com.petone.publication.service.PublicationService;
 public class PublicationController {
 
     private final PublicationService service;
+    private final JwtService jwtService;
 
     @PostMapping
     public ResponseEntity<Publication> crear(@RequestBody Publication dto) {
@@ -39,6 +41,7 @@ public class PublicationController {
 
     @PostMapping(value = "/con-imagenes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Publication> crearConImagenes(
+            HttpServletRequest request,
             @RequestParam String nombre,
             @RequestParam String ubicacion,
             @RequestParam String especie,
@@ -47,8 +50,19 @@ public class PublicationController {
             @RequestParam String descripcion,
             @RequestParam List<MultipartFile> fotos
     ) {
+
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String token = authHeader.substring(7);
+        Long userId = jwtService.extractUserId(token);
+
         Publication p = new Publication();
         p.setNombre(nombre);
+        p.setUserId(userId);
         p.setUbicacion(ubicacion);
         p.setEspecie(especie);
         p.setSexo(sexo);
