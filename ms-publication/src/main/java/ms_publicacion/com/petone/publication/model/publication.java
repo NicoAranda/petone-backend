@@ -30,6 +30,8 @@ public class Publication {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private Long userId;
+
     private String nombre;
     private String ubicacion;
     private String especie;

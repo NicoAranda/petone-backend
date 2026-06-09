@@ -16,7 +16,7 @@ import io.jsonwebtoken.security.Keys;
 
 @Service
 public class JwtService {
-    
+
     private static final String SECRET_KEY = "SeguridadSuperFuerteParaJWTPETONE";
 
     public String generateToken(User user) {
@@ -25,11 +25,11 @@ public class JwtService {
                 .claim("id", user.getId())
                 .claim("rol", user.getRol())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis()+ 1000 * 60 * 60 * 24))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
-    
+
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
@@ -39,7 +39,7 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    public Claims extractAllClaims(String token){
+    public Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSignInKey())
                 .build()
@@ -47,8 +47,16 @@ public class JwtService {
                 .getBody();
     }
 
+    public Long extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("id", Long.class));
+    }
+
+    public String extractRole(String token) {
+        return extractClaim(token, claims -> claims.get("rol", String.class));
+    }
+
     public Key getSignInKey() {
         byte[] keyBytes = SECRET_KEY.getBytes(StandardCharsets.UTF_8);
-    return Keys.hmacShaKeyFor(keyBytes);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 }
