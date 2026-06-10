@@ -4,6 +4,7 @@ const router = express.Router()
 
 const PUBLICATION_SERVICE = process.env.PUBLICATION_SERVICE || 'http://localhost:8080'
 const USER_SERVICE = process.env.USER_SERVICE || 'http://localhost:8081'
+const STORIES_SERVICE = process.env.STORIES_SERVICE || 'http://localhost:8082'
 
 const forwardHeaders = (req) => {
   const headers = {}
@@ -128,7 +129,6 @@ router.patch('/publicaciones/:id/reportar', async (req, res) => {
   }
 })
 
-// Proxy para actualizar una publicación (PUT)
 router.put('/publicaciones/:id', async (req, res) => {
   try {
     const resp = await fetchWithTimeout(`${PUBLICATION_SERVICE}/api/publicaciones/${req.params.id}`, {
@@ -145,7 +145,6 @@ router.put('/publicaciones/:id', async (req, res) => {
   }
 })
 
-// Proxy para eliminar una publicación (DELETE)
 router.delete('/publicaciones/:id', async (req, res) => {
   try {
     const resp = await fetchWithTimeout(`${PUBLICATION_SERVICE}/api/publicaciones/${req.params.id}`, {
@@ -161,7 +160,83 @@ router.delete('/publicaciones/:id', async (req, res) => {
   }
 })
 
-// Report routes proxy
+router.post('/publicaciones/con-imagenes', async (req, res) => {
+  try {
+    const headers = { ...(req.headers || {}) }
+    delete headers.host
+
+    const resp = await fetchWithTimeout(`${PUBLICATION_SERVICE}/api/publicaciones/con-imagenes`, {
+      method: 'POST',
+      body: req,
+      headers,
+      duplex: 'half'
+    }, 20000)
+
+    const pubData = await resp.json().catch(() => null)
+    if (!resp.ok) return res.status(resp.status).json(pubData || { error: 'Upstream error' })
+
+    if (pubData && pubData.id) {
+      try {
+        const primeraFoto = pubData.fotos && pubData.fotos.length > 0 
+          ? pubData.fotos[0].url 
+          : 'https://picsum.photos/400/700?random=default';
+
+        const storyPayload = {
+          user: pubData.nombre || 'Mascota PetOne',
+          avatar: 'https://i.pravatar.cc/100?img=1',
+          img: primeraFoto,
+          publicationId: pubData.id
+        };
+
+        await fetchWithTimeout(`${STORIES_SERVICE}/api/stories`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...forwardHeaders(req)
+          },
+          body: JSON.stringify(storyPayload)
+        }, 3000);
+        
+        console.log(`[BFF] Historia autogenerada con éxito para la publicación #${pubData.id}`);
+      } catch (storyErr) {
+        console.error('[BFF Mantenible] Error crítico al generar historia automática (Fallback activo):', storyErr.message);
+      }
+    }
+
+    return res.json(pubData)
+  } catch (err) {
+    console.error('bff POST /publicaciones/con-imagenes error', err?.message || err)
+    return res.status(502).json({ error: 'Error uploading publicación' })
+  }
+})
+
+router.get('/stories', async (req, res) => {
+  try {
+    const resp = await fetchWithTimeout(`${STORIES_SERVICE}/api/stories`, { headers: forwardHeaders(req) })
+    const data = await resp.json()
+    if (!resp.ok) return res.status(resp.status).json(data)
+    return res.json(data)
+  } catch (err) {
+    console.error('bff GET /stories error', err?.message || err)
+    return res.status(502).json({ error: 'Error fetching historias' })
+  }
+})
+
+router.delete('/stories/:id', async (req, res) => {
+  try {
+    const resp = await fetchWithTimeout(`${STORIES_SERVICE}/api/stories/${req.params.id}`, {
+      method: 'DELETE',
+      headers: forwardHeaders(req)
+    })
+    const data = await resp.json().catch(() => null)
+    if (!resp.ok) return res.status(resp.status).json(data || { error: 'Upstream error' })
+    return res.json(data)
+  } catch (err) {
+    console.error('bff DELETE /stories/:id error', err?.message || err)
+    return res.status(502).json({ error: 'Error deleting historia' })
+  }
+})
+
 router.get('/reportes', async (req, res) => {
   try {
     const resp = await fetchWithTimeout(`${PUBLICATION_SERVICE}/api/reportes`, { headers: forwardHeaders(req) })
@@ -248,31 +323,7 @@ router.delete('/reportes/:id', async (req, res) => {
   }
 })
 
-// File upload proxy: forward multipart stream directly to publication service without parsing
-router.post('/publicaciones/con-imagenes', async (req, res) => {
-  try {
-    // Forward original headers but remove host to avoid conflicts
-    const headers = { ...(req.headers || {}) }
-    delete headers.host
 
-    const resp = await fetchWithTimeout(`${PUBLICATION_SERVICE}/api/publicaciones/con-imagenes`, {
-      method: 'POST',
-      body: req,
-      headers,
-      duplex: 'half'
-    }, 20000)
-
-    // stream response back
-    const data = await resp.json().catch(() => null)
-    if (!resp.ok) return res.status(resp.status).json(data || { error: 'Upstream error' })
-    return res.json(data)
-  } catch (err) {
-    console.error('bff POST /publicaciones/con-imagenes error', err?.message || err)
-    return res.status(502).json({ error: 'Error uploading publicación' })
-  }
-})
-
-// User routes proxy (login, register, list, get by id)
 router.post('/usuarios/login', async (req, res) => {
   try {
     const resp = await fetchWithTimeout(`${USER_SERVICE}/api/usuarios/login`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...forwardHeaders(req) }, body: JSON.stringify(req.body) })
