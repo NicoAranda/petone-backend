@@ -84,6 +84,11 @@ public class PublicationController {
         return ResponseEntity.ok(service.viewById(id));
     }
 
+    @GetMapping("/usuario/{userId}")
+    public ResponseEntity<List<Publication>> obtenerPorUsuario(@PathVariable Long userId) {
+        return ResponseEntity.ok(service.viewByUserId(userId));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<Publication> actualizar(@PathVariable Long id, @RequestBody Publication dto) {
         return ResponseEntity.ok(service.updateById(id, dto));
