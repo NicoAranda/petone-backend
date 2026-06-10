@@ -24,12 +24,10 @@ public class PublicationService {
                     org.springframework.http.HttpStatus.BAD_REQUEST, "Publicación inválida");
         }
 
-
         if (p.getDescripcion() == null || p.getDescripcion().isBlank()) {
             throw new org.springframework.web.server.ResponseStatusException(
                     org.springframework.http.HttpStatus.BAD_REQUEST, "La descripción es obligatoria");
         }
-
 
         // Default fechaPublicacion a ahora si no está seteada
         if (p.getFechaPublicacion() == null) {
@@ -86,6 +84,10 @@ public class PublicationService {
     public Publication viewById(Long id) {
         return repo.findByIdWithFotos(id)
                 .orElseThrow(() -> new RuntimeException("Publicación no encontrada: " + id));
+    }
+
+    public List<Publication> viewByUserId(Long userId) {
+        return repo.findByUserIdWithFotos(userId);
     }
 
     public Publication updateById(Long id, Publication dto) {

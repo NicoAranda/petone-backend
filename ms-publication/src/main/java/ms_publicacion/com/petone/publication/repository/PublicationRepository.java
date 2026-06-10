@@ -19,4 +19,7 @@ public interface PublicationRepository extends JpaRepository<Publication, Long> 
     @Query("select p from Publication p left join fetch p.fotos where p.id = :id")
     Optional<Publication> findByIdWithFotos(@Param("id") Long id);
 
+    @Query(" SELECT DISTINCT p FROM Publication p LEFT JOIN FETCH p.fotos WHERE p.userId = :userId")
+    List<Publication> findByUserIdWithFotos(@Param("userId") Long userId);
+
 }

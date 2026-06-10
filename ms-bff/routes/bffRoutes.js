@@ -105,6 +105,38 @@ router.get('/publicaciones/reportadas', async (req, res) => {
   }
 })
 
+router.get('/publicaciones/usuario/:userId', async (req, res) => {
+  try {
+
+    const resp = await fetchWithTimeout(
+      `${PUBLICATION_SERVICE}/api/publicaciones/usuario/${req.params.userId}`,
+      {
+        headers: forwardHeaders(req)
+      }
+    );
+
+    const data = await resp.json();
+
+    if (!resp.ok) {
+      return res.status(resp.status).json(data);
+    }
+
+    return res.json(data);
+
+  } catch (err) {
+
+    console.error(
+      'bff GET /publicaciones/usuario/:userId error',
+      err?.message || err
+    );
+
+    return res.status(502).json({
+      error: 'Error fetching publicaciones del usuario'
+    });
+
+  }
+});
+
 router.get('/publicaciones/:id', async (req, res) => {
   try {
     const resp = await fetchWithTimeout(`${PUBLICATION_SERVICE}/api/publicaciones/${req.params.id}`, { headers: forwardHeaders(req) })
