@@ -1,10 +1,13 @@
 import express from 'express'
+import multer from 'multer'
 
 const router = express.Router()
+const upload = multer({ storage: multer.memoryStorage() })
 
 const PUBLICATION_SERVICE = process.env.PUBLICATION_SERVICE || 'http://localhost:8080'
 const USER_SERVICE = process.env.USER_SERVICE || 'http://localhost:8081'
 const STORIES_SERVICE = process.env.STORIES_SERVICE || 'http://localhost:8082'
+const PET_SERVICE = process.env.PET_SERVICE || 'http://localhost:8084'
 
 const forwardHeaders = (req) => {
   const headers = {}
@@ -134,6 +137,133 @@ router.get('/publicaciones/usuario/:userId', async (req, res) => {
       error: 'Error fetching publicaciones del usuario'
     });
 
+  }
+});
+
+router.get('/mascotas/usuario/:usuarioId', async (req, res) => {
+  try {
+    const resp = await fetchWithTimeout(
+      `${PET_SERVICE}/api/mascotas/usuario/${req.params.usuarioId}`,
+      { headers: forwardHeaders(req) }
+    );
+
+    const data = await resp.json();
+
+    if (!resp.ok) {
+      return res.status(resp.status).json(data);
+    }
+
+    return res.json(data);
+  } catch (err) {
+    console.error(
+      'bff GET /mascotas/usuario/:usuarioId error',
+      err?.message || err
+    );
+    return res.status(502).json({
+      error: 'Error fetching mascotas del usuario'
+    });
+  }
+});
+
+router.post('/mascotas', upload.array('fotos', 5), async (req, res) => {
+  try {
+    const formData = new FormData()
+
+    Object.entries(req.body).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        formData.append(key, value)
+      }
+    })
+
+    if (req.files) {
+      req.files.forEach((file) => {
+        formData.append('fotos', new Blob([file.buffer]), file.originalname)
+      })
+    }
+
+    const resp = await fetchWithTimeout(
+      `${PET_SERVICE}/api/mascotas`,
+      {
+        method: 'POST',
+        headers: {
+          ...forwardHeaders(req),
+          ...formData.getHeaders?.()
+        },
+        body: formData
+      }
+    )
+
+    const data = await resp.json()
+
+    if (!resp.ok) {
+      return res.status(resp.status).json(data)
+    }
+
+    return res.status(201).json(data)
+  } catch (err) {
+    console.error(
+      'bff POST /mascotas error',
+      err?.message || err
+    )
+    return res.status(502).json({
+      error: 'Error creating mascota'
+    })
+  }
+});
+
+router.put('/mascotas/:id', async (req, res) => {
+  try {
+    const resp = await fetchWithTimeout(
+      `${PET_SERVICE}/api/mascotas/${req.params.id}`,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...forwardHeaders(req) },
+        body: JSON.stringify(req.body)
+      }
+    );
+
+    const data = await resp.json();
+
+    if (!resp.ok) {
+      return res.status(resp.status).json(data);
+    }
+
+    return res.json(data);
+  } catch (err) {
+    console.error(
+      'bff PUT /mascotas/:id error',
+      err?.message || err
+    );
+    return res.status(502).json({
+      error: 'Error updating mascota'
+    });
+  }
+});
+
+router.delete('/mascotas/:id', async (req, res) => {
+  try {
+    const resp = await fetchWithTimeout(
+      `${PET_SERVICE}/api/mascotas/${req.params.id}`,
+      {
+        method: 'DELETE',
+        headers: forwardHeaders(req)
+      }
+    );
+
+    if (!resp.ok) {
+      const data = await resp.json();
+      return res.status(resp.status).json(data);
+    }
+
+    return res.status(204).send();
+  } catch (err) {
+    console.error(
+      'bff DELETE /mascotas/:id error',
+      err?.message || err
+    );
+    return res.status(502).json({
+      error: 'Error deleting mascota'
+    });
   }
 });
 
