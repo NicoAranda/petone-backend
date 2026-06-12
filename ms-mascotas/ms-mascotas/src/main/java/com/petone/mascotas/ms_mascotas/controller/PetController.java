@@ -2,7 +2,11 @@ package com.petone.mascotas.ms_mascotas.controller;
 
 import java.util.List;
 
+import java.io.IOException;
+import java.util.Base64;
+
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,6 +19,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 import com.petone.mascotas.ms_mascotas.model.Pet;
 import com.petone.mascotas.ms_mascotas.service.PetService;
@@ -29,10 +36,49 @@ public class PetController {
     
     private final PetService petService;
 
-    @PostMapping
-    public ResponseEntity<Pet> registrar(@RequestBody Pet dto){
-        Pet pet = petService.addPet(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(pet);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Pet> registrar(
+            @RequestParam String nombre,
+            @RequestParam(required = false) String raza,
+            @RequestParam(required = false) String color,
+            @RequestParam(required = false) String tamano,
+            @RequestParam(required = false) String estado,
+            @RequestParam(required = false) String descripcion,
+            @RequestParam(required = false) Long usuarioId,
+            @RequestParam(required = false) MultipartFile[] fotos,
+            jakarta.servlet.http.HttpServletRequest request) {
+        
+        if (usuarioId == null) {
+            usuarioId = (Long) request.getAttribute("userId");
+        }
+        
+        System.out.println("Creating pet: " + nombre + " for usuario: " + usuarioId);
+        
+        Pet pet = new Pet();
+        pet.setNombre(nombre);
+        pet.setRaza(raza != null ? raza : "No especificada");
+        pet.setColor(color != null ? color : "No especificado");
+        pet.setTamano(tamano != null ? tamano : "Medio");
+        pet.setEstado(estado != null ? estado : "Activo");
+        pet.setDescripcion(descripcion);
+        pet.setUsuarioId(usuarioId);
+
+        if (fotos != null && fotos.length > 0) {
+            try {
+                pet.setFotoUrl(convertToDataUrl(fotos[0]));
+            } catch (IOException e) {
+                System.err.println("Error processing pet photo: " + e.getMessage());
+            }
+        }
+        
+        Pet createdPet = petService.addPet(pet);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdPet);
+    }
+
+    private String convertToDataUrl(MultipartFile file) throws IOException {
+        String contentType = file.getContentType() != null ? file.getContentType() : "image/jpeg";
+        String base64 = Base64.getEncoder().encodeToString(file.getBytes());
+        return "data:" + contentType + ";base64," + base64;
     }
 
     @GetMapping
@@ -49,7 +95,9 @@ public class PetController {
 
     @GetMapping("/usuario/{usuarioId}")
     public ResponseEntity<List<Pet>> listarPorUsuario(@PathVariable Long usuarioId){
+        System.out.println("Fetching pets for usuario: " + usuarioId);
         List<Pet> pets = petService.viewPetsByUsuarioId(usuarioId);
+        System.out.println("Found " + pets.size() + " pets");
         return ResponseEntity.ok(pets);
     }
 

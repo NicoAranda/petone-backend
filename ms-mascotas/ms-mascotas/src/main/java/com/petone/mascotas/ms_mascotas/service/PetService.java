@@ -36,12 +36,13 @@ public class PetService {
         Pet existingPet = viewPetById(id);
         
         // Actualizamos los campos permitidos
-        existingPet.setNombre(dto.getNombre());
-        existingPet.setRaza(dto.getRaza());
-        existingPet.setColor(dto.getColor());
-        existingPet.setTamano(dto.getTamano());
-        existingPet.setEstado(dto.getEstado());
-        existingPet.setDescripcion(dto.getDescripcion());
+        if (dto.getNombre() != null) existingPet.setNombre(dto.getNombre());
+        if (dto.getRaza() != null) existingPet.setRaza(dto.getRaza());
+        if (dto.getColor() != null) existingPet.setColor(dto.getColor());
+        if (dto.getTamano() != null) existingPet.setTamano(dto.getTamano());
+        if (dto.getEstado() != null) existingPet.setEstado(dto.getEstado());
+        if (dto.getDescripcion() != null) existingPet.setDescripcion(dto.getDescripcion());
+        if (dto.getFotoUrl() != null) existingPet.setFotoUrl(dto.getFotoUrl());
         
         return petRepository.save(existingPet);
     }
