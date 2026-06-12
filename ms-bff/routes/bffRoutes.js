@@ -392,6 +392,19 @@ router.get('/usuarios', async (req, res) => {
   }
 })
 
+router.get('/usuarios/buscar', async (req, res) => {
+  try {
+    const query = req.query.q || ''
+    const resp = await fetchWithTimeout(`${USER_SERVICE}/api/usuarios/buscar?q=${encodeURIComponent(query)}`, { headers: forwardHeaders(req) })
+    const data = await resp.json()
+    if (!resp.ok) return res.status(resp.status).json(data)
+    return res.json(data)
+  } catch (err) {
+    console.error('bff GET /usuarios/buscar error', err?.message || err)
+    return res.status(502).json({ error: 'Error fetching usuarios' })
+  }
+})
+
 router.get('/usuarios/:id', async (req, res) => {
   try {
     const resp = await fetchWithTimeout(`${USER_SERVICE}/api/usuarios/${req.params.id}`, { headers: forwardHeaders(req) })

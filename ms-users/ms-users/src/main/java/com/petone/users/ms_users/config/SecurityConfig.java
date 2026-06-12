@@ -42,6 +42,7 @@ public class SecurityConfig {
                 // Solo Administradores
                 .requestMatchers(HttpMethod.GET, "/api/usuarios/me").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/usuarios").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/usuarios/buscar").permitAll()
                 .requestMatchers(HttpMethod.DELETE, "/api/usuarios/**").hasRole("ADMIN")
                 .requestMatchers("/api/usuarios/*/saldo").hasRole("ADMIN")
                 

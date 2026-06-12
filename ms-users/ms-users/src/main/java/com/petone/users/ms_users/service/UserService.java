@@ -92,6 +92,19 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    public List<User> searchUsers(String query) {
+        if (query == null || query.isBlank()) {
+            return List.of();
+        }
+        String normalized = query.toLowerCase();
+        return userRepository.findAll().stream()
+                .filter(user -> (user.getNombre() != null && user.getNombre().toLowerCase().contains(normalized))
+                        || (user.getApellido() != null && user.getApellido().toLowerCase().contains(normalized))
+                        || (user.getEmail() != null && user.getEmail().toLowerCase().contains(normalized))
+                        || (user.getRut() != null && user.getRut().toLowerCase().contains(normalized)))
+                .toList();
+    }
+
     public User viewUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(

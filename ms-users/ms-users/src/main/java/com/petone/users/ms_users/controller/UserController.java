@@ -54,6 +54,12 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
+    @GetMapping("/buscar")
+    public ResponseEntity<List<User>> buscarUsuarios(@RequestParam(name = "q", required = false) String q) {
+        List<User> users = userService.searchUsers(q);
+        return ResponseEntity.ok(users);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<User> mostrarUsuario(@PathVariable Long id){
         User user = userService.viewUserById(id);
