@@ -63,15 +63,21 @@ router.get('/publicaciones', async (req, res) => {
             }
           }
           const usuario = await userResp.json()
-          return {
-            ...pub,
-            usuario: {
-              id: usuario.id,
-              nombre: usuario.nombre,
-              apellido: usuario.apellido,
-              email: usuario.email
+          // Attach usuario only when a valid user object with an id is returned
+          if (usuario && (usuario.id !== undefined && usuario.id !== null)) {
+            return {
+              ...pub,
+              usuario: {
+                id: usuario.id,
+                nombre: usuario.nombre,
+                apellido: usuario.apellido,
+                email: usuario.email
+              }
             }
           }
+
+          // If upstream returned an unexpected shape, return the publication as-is
+          return pub
         } catch (error) {
           console.error(
             `Error obteniendo usuario ${pub.userId}:`,

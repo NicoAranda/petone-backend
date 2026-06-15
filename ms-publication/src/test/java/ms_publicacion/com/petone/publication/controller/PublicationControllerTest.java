@@ -82,4 +82,35 @@ public class PublicationControllerTest {
         ResponseEntity<Void> resp = controller.eliminar(4L);
         assertEquals(HttpStatus.NO_CONTENT, resp.getStatusCode());
     }
+
+    @Test
+    void crear_publicacion_devuelve_created() {
+        Publication input = new Publication(null, 6L, "Firulais", "Santiago", "Perro", "Macho", "ACTIVA", "Buen perro", new Date(), Arrays.asList());
+        Publication saved = new Publication(10L, 6L, "Firulais", "Santiago", "Perro", "Macho", "ACTIVA", "Buen perro", new Date(), Arrays.asList());
+        when(service.addPublication(input)).thenReturn(saved);
+
+        ResponseEntity<Publication> resp = controller.crear(input);
+        assertEquals(HttpStatus.CREATED, resp.getStatusCode());
+        assertEquals(10L, resp.getBody().getId().longValue());
+    }
+
+    @Test
+    void crear_con_imagenes_devuelve_created_o_unauthorized() {
+        jakarta.servlet.http.HttpServletRequest req = Mockito.mock(jakarta.servlet.http.HttpServletRequest.class);
+        when(req.getHeader("Authorization")).thenReturn("Bearer testtoken");
+        when(jwtService.extractUserId("testtoken")).thenReturn(6L);
+
+        Publication saved = new Publication(11L, 6L, "Firulais", "Santiago", "Perro", "Macho", "ACTIVA", "Buen perro", new Date(), Arrays.asList("/img/1.jpg"));
+        when(service.crearConImagenes(Mockito.any(Publication.class), Mockito.anyList())).thenReturn(saved);
+
+        ResponseEntity<Publication> resp = controller.crearConImagenes(req, "Firulais", "Santiago", "Perro", "Macho", "ACTIVA", "Buen perro", List.of());
+        assertEquals(HttpStatus.CREATED, resp.getStatusCode());
+        assertEquals(11L, resp.getBody().getId().longValue());
+
+        // Caso sin header -> unauthorized
+        jakarta.servlet.http.HttpServletRequest req2 = Mockito.mock(jakarta.servlet.http.HttpServletRequest.class);
+        when(req2.getHeader("Authorization")).thenReturn(null);
+        ResponseEntity<Publication> resp2 = controller.crearConImagenes(req2, "n", "u", "e", "s", "e", "d", List.of());
+        assertEquals(HttpStatus.UNAUTHORIZED, resp2.getStatusCode());
+    }
 }
