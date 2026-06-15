@@ -31,7 +31,7 @@ class PetServiceTest {
 
     @BeforeEach
     void setUp() {
-        samplePet = new Pet(1L, "Firulais", "Labrador", "Dorado", "Grande", "DISPONIBLE", "Perro amigable", 101L);
+        samplePet = new Pet(1L, "Firulais", "Labrador", "Dorado", "Grande", "DISPONIBLE", "Perro amigable", 101L, null);
     }
 
     @Test

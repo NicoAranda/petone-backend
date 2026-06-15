@@ -16,13 +16,13 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class SupabaseStorageService {
 
-    @Value("${supabase.url}")
+    @Value("${supabase.url:''}")
     private String supabaseUrl;
 
-    @Value("${supabase.key}")
+    @Value("${supabase.key:''}")
     private String supabaseKey;
 
-    @Value("${supabase.bucket}")
+    @Value("${supabase.bucket:''}")
     private String bucket;
 
     public String uploadFile(MultipartFile file) throws IOException {

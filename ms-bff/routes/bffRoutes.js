@@ -322,6 +322,32 @@ router.delete('/publicaciones/:id', async (req, res) => {
   }
 })
 
+router.post('/publicaciones', async (req, res) => {
+  try {
+    const resp = await fetchWithTimeout(
+      `${PUBLICATION_SERVICE}/api/publicaciones`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...forwardHeaders(req) },
+        body: JSON.stringify(req.body)
+      }
+    )
+
+    const data = await resp.json()
+
+    if (!resp.ok) {
+      return res.status(resp.status).json(data)
+    }
+
+    return res.status(201).json(data)
+  } catch (err) {
+    console.error('bff POST /publicaciones error', err?.message || err)
+    return res.status(502).json({
+      error: 'Error creating publicación'
+    })
+  }
+})
+
 router.post('/publicaciones/con-imagenes', async (req, res) => {
   try {
     const headers = { ...(req.headers || {}) }
