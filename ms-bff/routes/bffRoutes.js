@@ -573,4 +573,57 @@ router.get('/usuarios/:id', async (req, res) => {
   }
 })
 
+// Rutas de comentarios
+router.get('/publicaciones/:publicacionId/comentarios', async (req, res) => {
+  try {
+    const resp = await fetchWithTimeout(
+      `${PUBLICATION_SERVICE}/api/publicaciones/${req.params.publicacionId}/comentarios`,
+      { headers: forwardHeaders(req) }
+    )
+    const comentarios = await resp.json()
+    if (!resp.ok) return res.status(resp.status).json(comentarios)
+    return res.json(comentarios)
+  } catch (err) {
+    console.error('bff GET /publicaciones/:publicacionId/comentarios error', err?.message || err)
+    return res.status(502).json({ error: 'Error fetching comentarios' })
+  }
+})
+
+router.post('/publicaciones/:publicacionId/comentarios', async (req, res) => {
+  try {
+    const resp = await fetchWithTimeout(
+      `${PUBLICATION_SERVICE}/api/publicaciones/${req.params.publicacionId}/comentarios`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...forwardHeaders(req) },
+        body: JSON.stringify(req.body)
+      }
+    )
+    const data = await resp.json()
+    if (!resp.ok) return res.status(resp.status).json(data)
+    return res.status(201).json(data)
+  } catch (err) {
+    console.error('bff POST /publicaciones/:publicacionId/comentarios error', err?.message || err)
+    return res.status(502).json({ error: 'Error creating comentario' })
+  }
+})
+
+router.delete('/publicaciones/comentarios/:comentarioId', async (req, res) => {
+  try {
+    const resp = await fetchWithTimeout(
+      `${PUBLICATION_SERVICE}/api/publicaciones/comentarios/${req.params.comentarioId}`,
+      {
+        method: 'DELETE',
+        headers: forwardHeaders(req)
+      }
+    )
+    const data = await resp.json().catch(() => null)
+    if (!resp.ok) return res.status(resp.status).json(data || { error: 'Upstream error' })
+    return res.json(data)
+  } catch (err) {
+    console.error('bff DELETE /publicaciones/comentarios/:comentarioId error', err?.message || err)
+    return res.status(502).json({ error: 'Error deleting comentario' })
+  }
+})
+
 export default router

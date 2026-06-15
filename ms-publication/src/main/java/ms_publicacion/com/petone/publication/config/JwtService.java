@@ -26,6 +26,21 @@ public class JwtService {
         return extractAllClaims(token).get("id", Long.class);
     }
 
+    public String extractUsername(String token) {
+        Claims claims = extractAllClaims(token);
+        String nombre = claims.get("nombre", String.class);
+        if (nombre == null) {
+            nombre = claims.getSubject(); // fallback al email si no hay nombre
+        }
+        return nombre;
+    }
+
+    public String extractUserApellido(String token) {
+        Claims claims = extractAllClaims(token);
+        String apellido = claims.get("apellido", String.class);
+        return apellido != null ? apellido : "";
+    }
+
     private Key getSignInKey() {
         byte[] keyBytes = SECRET_KEY.getBytes(StandardCharsets.UTF_8);
         return Keys.hmacShaKeyFor(keyBytes);
