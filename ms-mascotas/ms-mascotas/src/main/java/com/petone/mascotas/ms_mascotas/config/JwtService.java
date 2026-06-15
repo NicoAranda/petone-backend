@@ -16,7 +16,12 @@ public class JwtService {
     private static final String SECRET_KEY = "SeguridadSuperFuerteParaJWTPETONE";
 
     public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+        Claims claims = extractAllClaims(token);
+        String nombre = claims.get("nombre", String.class);
+        if (nombre == null) {
+            nombre = extractClaim(token, Claims::getSubject); // fallback al email si no hay nombre
+        }
+        return nombre;
     }
     
     public Long extractUserId(String token) {

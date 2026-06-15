@@ -23,6 +23,8 @@ public class JwtService {
         return Jwts.builder()
                 .setSubject(user.getEmail())
                 .claim("id", user.getId())
+                .claim("nombre", user.getNombre())
+                .claim("apellido", user.getApellido())
                 .claim("rol", user.getRol())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
