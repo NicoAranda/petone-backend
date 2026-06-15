@@ -27,12 +27,26 @@ public class JwtService {
     }
 
     public String extractUsername(String token) {
-        Claims claims = extractAllClaims(token);
-        String nombre = claims.get("nombre", String.class);
-        if (nombre == null) {
-            nombre = claims.getSubject(); // fallback al email si no hay nombre
+        try {
+            Claims claims = extractAllClaims(token);
+            String nombre = claims.get("nombre", String.class);
+            
+            System.out.println("DEBUG JwtService - Claims keys: " + claims.keySet());
+            System.out.println("DEBUG JwtService - nombre claim: " + nombre);
+            
+            if (nombre != null && !nombre.trim().isEmpty()) {
+                System.out.println("DEBUG JwtService - Retornando nombre del claim: " + nombre);
+                return nombre;
+            }
+            
+            String email = claims.getSubject();
+            System.out.println("DEBUG JwtService - Retornando email como fallback: " + email);
+            return email;
+        } catch (Exception e) {
+            System.out.println("ERROR JwtService extractUsername: " + e.getMessage());
+            e.printStackTrace();
+            return null;
         }
-        return nombre;
     }
 
     public String extractUserApellido(String token) {
