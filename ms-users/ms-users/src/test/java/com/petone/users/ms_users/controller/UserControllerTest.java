@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -66,5 +67,28 @@ public class UserControllerTest {
 
         ResponseEntity<Void> resp = controller.eliminarUsuario(4L);
         assertEquals(HttpStatus.NO_CONTENT, resp.getStatusCode());
+    }
+
+    @Test
+    void registrar_devuelve_created() {
+        User input = User.builder().nombre("Luis").apellido("Gomez").email("luis@example.com").password("pass123").rol("CLIENTE").rut("44444444-4").telefono("900900900").build();
+        User saved = User.builder().id(5L).nombre("Luis").apellido("Gomez").email("luis@example.com").password("pass123").rol("CLIENTE").rut("44444444-4").telefono("900900900").build();
+        when(service.addUser(input)).thenReturn(saved);
+
+        ResponseEntity<User> resp = controller.registrar(input);
+        assertEquals(HttpStatus.CREATED, resp.getStatusCode());
+        assertEquals(5L, resp.getBody().getId().longValue());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void login_devuelve_token() {
+        User dto = User.builder().email("ana@example.com").password("secret").build();
+        when(service.login(dto)).thenReturn("jwt.token.value");
+
+        ResponseEntity<?> resp = controller.login(dto);
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
+        Map<String, String> body = (Map<String, String>) resp.getBody();
+        assertEquals("jwt.token.value", body.get("token"));
     }
 }
