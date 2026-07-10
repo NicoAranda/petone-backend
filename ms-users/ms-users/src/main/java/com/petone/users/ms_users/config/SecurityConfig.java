@@ -49,7 +49,7 @@ public class SecurityConfig {
 
 						// Usuarios Autenticados
 						.requestMatchers(HttpMethod.GET, "/api/usuarios/{id}").permitAll()
-						.requestMatchers(HttpMethod.PATCH, "/api/usuarios/{id}").permitAll()
+						.requestMatchers(HttpMethod.PUT, "/api/usuarios/{id}").permitAll()
 
 						// Clientes autenticados pueden crear solicitudes
 						.requestMatchers(HttpMethod.POST,
