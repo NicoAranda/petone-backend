@@ -23,58 +23,83 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthFilter;
+	private final JwtAuthenticationFilter jwtAuthFilter;
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/error").permitAll()
-                
-                // Públicos
-                .requestMatchers("/api/usuarios/login").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/usuarios/registro-cliente").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
-                
-                // Solo Administradores
-                .requestMatchers(HttpMethod.GET, "/api/usuarios/me").authenticated()
-                .requestMatchers(HttpMethod.GET, "/api/usuarios").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.GET, "/api/usuarios/buscar").permitAll()
-                .requestMatchers(HttpMethod.DELETE, "/api/usuarios/**").hasRole("ADMIN")
-                .requestMatchers("/api/usuarios/*/saldo").hasRole("ADMIN")
-                
-                // Usuarios Autenticados
-                .requestMatchers(HttpMethod.GET, "/api/usuarios/{id}").permitAll()
-                .requestMatchers(HttpMethod.PATCH, "/api/usuarios/{id}").permitAll()
-                
-                .anyRequest().authenticated()
-            )
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+		http
+				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+				.csrf(csrf -> csrf.disable())
+				.authorizeHttpRequests(auth -> auth
+						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+						.requestMatchers("/error").permitAll()
 
-        return http.build();
-    }
+						// Públicos
+						.requestMatchers("/api/usuarios/login").permitAll()
+						.requestMatchers(HttpMethod.POST, "/api/usuarios/registro-cliente")
+						.permitAll()
+						.requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        
-        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:5173", "http://localhost:5173/"));
-        
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
-        configuration.setAllowCredentials(true); 
+						// Solo Administradores
+						.requestMatchers(HttpMethod.GET, "/api/usuarios/me").authenticated()
+						.requestMatchers(HttpMethod.GET, "/api/usuarios").hasRole("ADMIN")
+						.requestMatchers(HttpMethod.GET, "/api/usuarios/buscar").permitAll()
+						.requestMatchers(HttpMethod.DELETE, "/api/usuarios/**").hasRole("ADMIN")
+						.requestMatchers("/api/usuarios/*/saldo").hasRole("ADMIN")
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration); 
-        return source;
-    }
+						// Usuarios Autenticados
+						.requestMatchers(HttpMethod.GET, "/api/usuarios/{id}").permitAll()
+						.requestMatchers(HttpMethod.PATCH, "/api/usuarios/{id}").permitAll()
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+						// Clientes autenticados pueden crear solicitudes
+						.requestMatchers(HttpMethod.POST,
+								"/api/solicitudes-organizacion")
+						.hasRole("CLIENTE")
+
+						// Cliente puede consultar sus solicitudes
+						.requestMatchers(HttpMethod.GET,
+								"/api/solicitudes-organizacion/usuario/**")
+						.authenticated()
+
+						// Solo administradores
+						.requestMatchers(HttpMethod.GET,
+								"/api/solicitudes-organizacion")
+						.hasRole("ADMIN")
+
+						.requestMatchers(HttpMethod.GET,
+								"/api/solicitudes-organizacion/*")
+						.hasRole("ADMIN")
+
+						.requestMatchers(HttpMethod.PUT,
+								"/api/solicitudes-organizacion/**")
+						.hasRole("ADMIN")
+
+						.anyRequest().authenticated())
+				.sessionManagement(session -> session
+						.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+		return http.build();
+	}
+
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration configuration = new CorsConfiguration();
+
+		configuration.setAllowedOriginPatterns(
+				Arrays.asList("http://localhost:5173", "http://localhost:5173/"));
+
+		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+		configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+		configuration.setAllowCredentials(true);
+
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration);
+		return source;
+	}
+
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 }

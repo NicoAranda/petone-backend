@@ -53,8 +53,10 @@ public class UserService {
         if (dto.getRol() == null || dto.getRol().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El rol es obligatorio");
         }
-        if (!dto.getRol().equalsIgnoreCase("ADMIN") && !dto.getRol().equalsIgnoreCase("CLIENTE")) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El rol debe ser ADMIN o CLIENTE");
+        if (!dto.getRol().equalsIgnoreCase("ADMIN")
+                && !dto.getRol().equalsIgnoreCase("CLIENTE")
+                && !dto.getRol().equalsIgnoreCase("ORGANIZACION")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El rol debe ser ADMIN,  CLIENTE u ORGANIZACION");
         }
 
         if (dto.getRut() == null || dto.getRut().isBlank()) {
@@ -69,15 +71,15 @@ public class UserService {
         }
 
         User user = User.builder()
-            .nombre(dto.getNombre())
-            .apellido(dto.getApellido())
-            .email(dto.getEmail())
-            .password(passwordEncoder.encode(dto.getPassword()))
-            .rol(dto.getRol().toUpperCase())
-            // .saldoMonedas(dto.getSaldoMonedas() != null ? dto.getSaldoMonedas() : 0)
-            .rut(dto.getRut())
-            .telefono(dto.getTelefono())
-            .build();
+                .nombre(dto.getNombre())
+                .apellido(dto.getApellido())
+                .email(dto.getEmail())
+                .password(passwordEncoder.encode(dto.getPassword()))
+                .rol(dto.getRol().toUpperCase())
+                // .saldoMonedas(dto.getSaldoMonedas() != null ? dto.getSaldoMonedas() : 0)
+                .rut(dto.getRut())
+                .telefono(dto.getTelefono())
+                .build();
 
         return userRepository.save(user);
     }
@@ -140,23 +142,23 @@ public class UserService {
         }
 
         if (dto.getRol() != null && !dto.getRol().isBlank()) {
-            user.setRol(dto.getRol().toUpperCase());
+
+            String rol = dto.getRol().toUpperCase();
+
+            if (!rol.equals("ADMIN")
+                    && !rol.equals("CLIENTE")
+                    && !rol.equals("ORGANIZACION")) {
+
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Rol inválido");
+            }
+
+            user.setRol(rol);
         }
 
         return userRepository.save(user);
     }
-
-    // public User updateSaldo(Long id, Integer nuevaCantidad) {
-    //     User user = userRepository.findById(id)
-    //             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
-
-    //     if (nuevaCantidad == null || nuevaCantidad < 0) {
-    //         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Saldo inválido");
-    //     }
-
-    //     user.setSaldoMonedas(nuevaCantidad);
-    //     return userRepository.save(user);
-    // }
 
     public void deleteUser(Long id) {
         User user = userRepository.findById(id)
@@ -174,6 +176,30 @@ public class UserService {
         }
 
         return jwtService.generateToken(user);
+    }
+
+    public User actualizarRol(Long usuarioId, String nuevoRol) {
+
+        User user = userRepository.findById(usuarioId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Usuario no encontrado"));
+
+        nuevoRol = nuevoRol.toUpperCase();
+
+        if (!nuevoRol.equals("ADMIN")
+                && !nuevoRol.equals("CLIENTE")
+                && !nuevoRol.equals("ORGANIZACION")) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Rol inválido");
+        }
+
+        user.setRol(nuevoRol);
+
+        return userRepository.save(user);
+
     }
 
 }
