@@ -51,6 +51,18 @@ describe('BFF routes', () => {
     expect(global.fetch).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ headers: expect.objectContaining({ Authorization: 'Bearer token123' }) }))
   })
 
+  test('GET /bff/mascotas returns pets from pet service', async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => [{ id: 7, nombre: 'Milo', raza: 'Labrador', estado: 'ACTIVO' }]
+    })
+
+    const res = await request(app).get('/bff/mascotas')
+    expect(res.status).toBe(200)
+    expect(res.body).toEqual([{ id: 7, nombre: 'Milo', raza: 'Labrador', estado: 'ACTIVO' }])
+  })
+
   test('handles upstream error gracefully', async () => {
     global.fetch = jest.fn().mockRejectedValue(new Error('network'))
 

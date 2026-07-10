@@ -146,6 +146,28 @@ router.get('/publicaciones/usuario/:userId', async (req, res) => {
   }
 });
 
+router.get('/mascotas', async (req, res) => {
+  try {
+    const resp = await fetchWithTimeout(
+      `${PET_SERVICE}/api/mascotas`,
+      { headers: forwardHeaders(req) }
+    );
+
+    const data = await resp.json();
+
+    if (!resp.ok) {
+      return res.status(resp.status).json(data);
+    }
+
+    return res.json(data);
+  } catch (err) {
+    console.error('bff GET /mascotas error', err?.message || err)
+    return res.status(502).json({
+      error: 'Error fetching mascotas'
+    })
+  }
+})
+
 router.get('/mascotas/usuario/:usuarioId', async (req, res) => {
   try {
     const resp = await fetchWithTimeout(
