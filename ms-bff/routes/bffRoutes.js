@@ -636,10 +636,16 @@ router.delete('/publicaciones/comentarios/:comentarioId', async (req, res) => {
 
 router.post('/solicitudes-organizacion', async (req, res) => {
   try {
-    const { usuarioId } = req.body
+    const usuarioId = req.query.usuarioId
+
+    if (!usuarioId) {
+      return res.status(400).json({
+        error: 'El usuarioId es obligatorio'
+      })
+    }
 
     const resp = await fetchWithTimeout(
-      `${USER_SERVICE}/api/solicitudes-organizacion?usuarioId=${usuarioId}`,
+      `${USER_SERVICE}/api/solicitudes-organizacion?usuarioId=${encodeURIComponent(usuarioId)}`,
       {
         method: 'POST',
         headers: {
@@ -650,16 +656,19 @@ router.post('/solicitudes-organizacion', async (req, res) => {
       }
     )
 
-    const data = await resp.json()
+    const data = await resp.json().catch(() => null)
 
     if (!resp.ok) {
-      return res.status(resp.status).json(data)
+      return res.status(resp.status).json(
+        data || {
+          error: 'Error en el microservicio de usuarios'
+        }
+      )
     }
 
     return res.status(201).json(data)
 
   } catch (err) {
-
     console.error(
       'bff POST /solicitudes-organizacion error',
       err?.message || err
@@ -668,7 +677,6 @@ router.post('/solicitudes-organizacion', async (req, res) => {
     return res.status(502).json({
       error: 'Error creating organization request'
     })
-
   }
 })
 
@@ -775,91 +783,119 @@ router.get('/solicitudes-organizacion/usuario/:usuarioId', async (req, res) => {
 })
 
 router.put('/solicitudes-organizacion/:id/aprobar', async (req, res) => {
-
   try {
+    const { id } = req.params
+    const administradorId = req.query.administradorId
+    const respuesta = req.query.respuesta || ''
 
-    const { administradorId, respuesta } = req.body
-
-    const resp = await fetchWithTimeout(
-
-      `${USER_SERVICE}/api/solicitudes-organizacion/${req.params.id}/aprobar?administradorId=${administradorId}&respuesta=${encodeURIComponent(respuesta || '')}`,
-
-      {
-        method: 'PUT',
-        headers: forwardHeaders(req)
-      }
-
-    )
-
-    if (!resp.ok) {
-
-      const data = await resp.json()
-
-      return res.status(resp.status).json(data)
-
+    if (!id || id === 'null' || id === 'undefined') {
+      return res.status(400).json({
+        error: 'El ID de la solicitud es obligatorio'
+      })
     }
 
-    const data = await resp.json()
+    if (
+      !administradorId ||
+      administradorId === 'null' ||
+      administradorId === 'undefined'
+    ) {
+      return res.status(400).json({
+        error: 'El administradorId es obligatorio'
+      })
+    }
+
+    const url =
+      `${USER_SERVICE}/api/solicitudes-organizacion/${encodeURIComponent(id)}` +
+      `/aprobar?administradorId=${encodeURIComponent(administradorId)}` +
+      `&respuesta=${encodeURIComponent(respuesta)}`
+
+    const resp = await fetchWithTimeout(url, {
+      method: 'PUT',
+      headers: forwardHeaders(req)
+    })
+
+    const data = await resp.json().catch(() => null)
+
+    if (!resp.ok) {
+      return res.status(resp.status).json(
+        data || {
+          error: 'Error al aprobar la solicitud'
+        }
+      )
+    }
 
     return res.json(data)
-
   } catch (err) {
-
     console.error(
-      'bff PUT aprobar solicitud error',
+      'bff PUT /solicitudes-organizacion/:id/aprobar error',
       err?.message || err
     )
 
     return res.status(502).json({
-      error: 'Error approving request'
+      error: 'Error al aprobar la solicitud de organización'
     })
-
   }
-
 })
 
 router.put('/solicitudes-organizacion/:id/rechazar', async (req, res) => {
-
   try {
+    const { id } = req.params
+    const administradorId = req.query.administradorId
+    const respuesta = req.query.respuesta || ''
 
-    const { administradorId, respuesta } = req.body
-
-    const resp = await fetchWithTimeout(
-
-      `${USER_SERVICE}/api/solicitudes-organizacion/${req.params.id}/rechazar?administradorId=${administradorId}&respuesta=${encodeURIComponent(respuesta)}`,
-
-      {
-        method: 'PUT',
-        headers: forwardHeaders(req)
-      }
-
-    )
-
-    if (!resp.ok) {
-
-      const data = await resp.json()
-
-      return res.status(resp.status).json(data)
-
+    if (!id || id === 'null' || id === 'undefined') {
+      return res.status(400).json({
+        error: 'El ID de la solicitud es obligatorio'
+      })
     }
 
-    const data = await resp.json()
+    if (
+      !administradorId ||
+      administradorId === 'null' ||
+      administradorId === 'undefined'
+    ) {
+      return res.status(400).json({
+        error: 'El administradorId es obligatorio'
+      })
+    }
+
+    if (!respuesta.trim()) {
+      return res.status(400).json({
+        error: 'La respuesta del administrador es obligatoria'
+      })
+    }
+
+    const url =
+      `${USER_SERVICE}/api/solicitudes-organizacion/${encodeURIComponent(id)}` +
+      `/rechazar?administradorId=${encodeURIComponent(administradorId)}` +
+      `&respuesta=${encodeURIComponent(respuesta)}`
+
+    const resp = await fetchWithTimeout(url, {
+      method: 'PUT',
+      headers: forwardHeaders(req)
+    })
+
+    const data = await resp.json().catch(() => null)
+
+    if (!resp.ok) {
+      return res.status(resp.status).json(
+        data || {
+          error: 'Error al rechazar la solicitud'
+        }
+      )
+    }
 
     return res.json(data)
-
   } catch (err) {
-
     console.error(
-      'bff PUT rechazar solicitud error',
+      'bff PUT /solicitudes-organizacion/:id/rechazar error',
       err?.message || err
     )
 
     return res.status(502).json({
-      error: 'Error rejecting request'
+      error: 'Error al rechazar la solicitud de organización'
     })
-
   }
-
 })
 
 
