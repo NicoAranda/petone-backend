@@ -393,8 +393,8 @@ router.post('/publicaciones/con-imagenes', async (req, res) => {
 
     if (pubData && pubData.id) {
       try {
-        const primeraFoto = pubData.fotos && pubData.fotos.length > 0 
-          ? pubData.fotos[0].url 
+        const primeraFoto = pubData.fotos && pubData.fotos.length > 0
+          ? pubData.fotos[0].url
           : 'https://picsum.photos/400/700?random=default';
 
         const storyPayload = {
@@ -412,7 +412,7 @@ router.post('/publicaciones/con-imagenes', async (req, res) => {
           },
           body: JSON.stringify(storyPayload)
         }, 3000);
-        
+
         console.log(`[BFF] Historia autogenerada con éxito para la publicación #${pubData.id}`);
       } catch (storyErr) {
         console.error('[BFF Mantenible] Error crítico al generar historia automática (Fallback activo):', storyErr.message);
@@ -653,5 +653,273 @@ router.delete('/publicaciones/comentarios/:comentarioId', async (req, res) => {
     return res.status(502).json({ error: 'Error deleting comentario' })
   }
 })
+
+// rutas de solicitudes
+
+router.post('/solicitudes-organizacion', async (req, res) => {
+  try {
+    const usuarioId = req.query.usuarioId
+
+    if (!usuarioId) {
+      return res.status(400).json({
+        error: 'El usuarioId es obligatorio'
+      })
+    }
+
+    const resp = await fetchWithTimeout(
+      `${USER_SERVICE}/api/solicitudes-organizacion?usuarioId=${encodeURIComponent(usuarioId)}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...forwardHeaders(req)
+        },
+        body: JSON.stringify(req.body)
+      }
+    )
+
+    const data = await resp.json().catch(() => null)
+
+    if (!resp.ok) {
+      return res.status(resp.status).json(
+        data || {
+          error: 'Error en el microservicio de usuarios'
+        }
+      )
+    }
+
+    return res.status(201).json(data)
+
+  } catch (err) {
+    console.error(
+      'bff POST /solicitudes-organizacion error',
+      err?.message || err
+    )
+
+    return res.status(502).json({
+      error: 'Error creating organization request'
+    })
+  }
+})
+
+router.get('/solicitudes-organizacion', async (req, res) => {
+
+  try {
+
+    const resp = await fetchWithTimeout(
+      `${USER_SERVICE}/api/solicitudes-organizacion`,
+      {
+        headers: forwardHeaders(req)
+      }
+    )
+
+    const data = await resp.json()
+
+    if (!resp.ok) {
+      return res.status(resp.status).json(data)
+    }
+
+    return res.json(data)
+
+  } catch (err) {
+
+    console.error(
+      'bff GET /solicitudes-organizacion error',
+      err?.message || err
+    )
+
+    return res.status(502).json({
+      error: 'Error fetching organization requests'
+    })
+
+  }
+
+})
+
+router.get('/solicitudes-organizacion/:id', async (req, res) => {
+
+  try {
+
+    const resp = await fetchWithTimeout(
+      `${USER_SERVICE}/api/solicitudes-organizacion/${req.params.id}`,
+      {
+        headers: forwardHeaders(req)
+      }
+    )
+
+    const data = await resp.json()
+
+    if (!resp.ok) {
+      return res.status(resp.status).json(data)
+    }
+
+    return res.json(data)
+
+  } catch (err) {
+
+    console.error(
+      'bff GET /solicitudes-organizacion/:id error',
+      err?.message || err
+    )
+
+    return res.status(502).json({
+      error: 'Error fetching organization request'
+    })
+
+  }
+
+})
+
+router.get('/solicitudes-organizacion/usuario/:usuarioId', async (req, res) => {
+
+  try {
+
+    const resp = await fetchWithTimeout(
+      `${USER_SERVICE}/api/solicitudes-organizacion/usuario/${req.params.usuarioId}`,
+      {
+        headers: forwardHeaders(req)
+      }
+    )
+
+    const data = await resp.json()
+
+    if (!resp.ok) {
+      return res.status(resp.status).json(data)
+    }
+
+    return res.json(data)
+
+  } catch (err) {
+
+    console.error(
+      'bff GET /solicitudes-organizacion/usuario error',
+      err?.message || err
+    )
+
+    return res.status(502).json({
+      error: 'Error fetching organization requests'
+    })
+
+  }
+
+})
+
+router.put('/solicitudes-organizacion/:id/aprobar', async (req, res) => {
+  try {
+    const { id } = req.params
+    const administradorId = req.query.administradorId
+    const respuesta = req.query.respuesta || ''
+
+    if (!id || id === 'null' || id === 'undefined') {
+      return res.status(400).json({
+        error: 'El ID de la solicitud es obligatorio'
+      })
+    }
+
+    if (
+      !administradorId ||
+      administradorId === 'null' ||
+      administradorId === 'undefined'
+    ) {
+      return res.status(400).json({
+        error: 'El administradorId es obligatorio'
+      })
+    }
+
+    const url =
+      `${USER_SERVICE}/api/solicitudes-organizacion/${encodeURIComponent(id)}` +
+      `/aprobar?administradorId=${encodeURIComponent(administradorId)}` +
+      `&respuesta=${encodeURIComponent(respuesta)}`
+
+    const resp = await fetchWithTimeout(url, {
+      method: 'PUT',
+      headers: forwardHeaders(req)
+    })
+
+    const data = await resp.json().catch(() => null)
+
+    if (!resp.ok) {
+      return res.status(resp.status).json(
+        data || {
+          error: 'Error al aprobar la solicitud'
+        }
+      )
+    }
+
+    return res.json(data)
+  } catch (err) {
+    console.error(
+      'bff PUT /solicitudes-organizacion/:id/aprobar error',
+      err?.message || err
+    )
+
+    return res.status(502).json({
+      error: 'Error al aprobar la solicitud de organización'
+    })
+  }
+})
+
+router.put('/solicitudes-organizacion/:id/rechazar', async (req, res) => {
+  try {
+    const { id } = req.params
+    const administradorId = req.query.administradorId
+    const respuesta = req.query.respuesta || ''
+
+    if (!id || id === 'null' || id === 'undefined') {
+      return res.status(400).json({
+        error: 'El ID de la solicitud es obligatorio'
+      })
+    }
+
+    if (
+      !administradorId ||
+      administradorId === 'null' ||
+      administradorId === 'undefined'
+    ) {
+      return res.status(400).json({
+        error: 'El administradorId es obligatorio'
+      })
+    }
+
+    if (!respuesta.trim()) {
+      return res.status(400).json({
+        error: 'La respuesta del administrador es obligatoria'
+      })
+    }
+
+    const url =
+      `${USER_SERVICE}/api/solicitudes-organizacion/${encodeURIComponent(id)}` +
+      `/rechazar?administradorId=${encodeURIComponent(administradorId)}` +
+      `&respuesta=${encodeURIComponent(respuesta)}`
+
+    const resp = await fetchWithTimeout(url, {
+      method: 'PUT',
+      headers: forwardHeaders(req)
+    })
+
+    const data = await resp.json().catch(() => null)
+
+    if (!resp.ok) {
+      return res.status(resp.status).json(
+        data || {
+          error: 'Error al rechazar la solicitud'
+        }
+      )
+    }
+
+    return res.json(data)
+  } catch (err) {
+    console.error(
+      'bff PUT /solicitudes-organizacion/:id/rechazar error',
+      err?.message || err
+    )
+
+    return res.status(502).json({
+      error: 'Error al rechazar la solicitud de organización'
+    })
+  }
+})
+
+
 
 export default router
