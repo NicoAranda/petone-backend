@@ -31,5 +31,7 @@ public class User {
     private String telefono;
     @Column(name = "descripcion")
     private String descripcion;
+    @Column(name = "privacidad_datos")
+    private Boolean privacidadDatos;
 
 }

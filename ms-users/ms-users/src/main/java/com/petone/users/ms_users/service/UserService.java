@@ -80,6 +80,7 @@ public class UserService {
                 .rut(dto.getRut())
                 .telefono(dto.getTelefono())
                 .descripcion(dto.getDescripcion())
+                .privacidadDatos(dto.getPrivacidadDatos())
                 .build();
 
         return userRepository.save(user);
@@ -144,6 +145,10 @@ public class UserService {
 
         if (dto.getDescripcion() != null) {
             user.setDescripcion(dto.getDescripcion());
+        }
+
+        if (dto.getPrivacidadDatos() != null) {
+            user.setPrivacidadDatos(dto.getPrivacidadDatos());
         }
 
         if (dto.getRol() != null && !dto.getRol().isBlank()) {
