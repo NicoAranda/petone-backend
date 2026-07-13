@@ -601,6 +601,22 @@ router.get('/usuarios/:id', async (req, res) => {
   }
 })
 
+router.put('/usuarios/:id', async (req, res) => {
+  try {
+    const resp = await fetchWithTimeout(`${USER_SERVICE}/api/usuarios/${req.params.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...forwardHeaders(req) },
+      body: JSON.stringify(req.body)
+    })
+    const data = await resp.json().catch(() => null)
+    if (!resp.ok) return res.status(resp.status).json(data || { error: 'Upstream error' })
+    return res.json(data)
+  } catch (err) {
+    console.error('bff PUT /usuarios/:id error', err?.message || err)
+    return res.status(502).json({ error: 'Error updating usuario' })
+  }
+})
+
 // Rutas de comentarios
 router.get('/publicaciones/:publicacionId/comentarios', async (req, res) => {
   try {

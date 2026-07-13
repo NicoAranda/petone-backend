@@ -79,6 +79,7 @@ public class UserService {
                 // .saldoMonedas(dto.getSaldoMonedas() != null ? dto.getSaldoMonedas() : 0)
                 .rut(dto.getRut())
                 .telefono(dto.getTelefono())
+                .descripcion(dto.getDescripcion())
                 .build();
 
         return userRepository.save(user);
@@ -139,6 +140,10 @@ public class UserService {
 
         if (dto.getTelefono() != null) {
             user.setTelefono(dto.getTelefono());
+        }
+
+        if (dto.getDescripcion() != null) {
+            user.setDescripcion(dto.getDescripcion());
         }
 
         if (dto.getRol() != null && !dto.getRol().isBlank()) {
