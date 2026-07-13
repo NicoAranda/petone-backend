@@ -203,28 +203,30 @@ router.post('/mascotas', upload.array('fotos', 5), async (req, res) => {
       }
     })
 
-    if (req.files) {
+    if (req.files && req.files.length > 0) {
       req.files.forEach((file) => {
-        formData.append('fotos', new Blob([file.buffer]), file.originalname)
+        const blob = new global.Blob([file.buffer], { type: file.mimetype })
+        formData.append('fotos', blob, file.originalname)
       })
     }
 
+    const extraHeaders = typeof formData.getHeaders === 'function' ? formData.getHeaders() : {}
     const resp = await fetchWithTimeout(
       `${PET_SERVICE}/api/mascotas`,
       {
         method: 'POST',
         headers: {
           ...forwardHeaders(req),
-          ...formData.getHeaders?.()
+          ...extraHeaders
         },
         body: formData
       }
     )
 
-    const data = await resp.json()
+    const data = await resp.json().catch(() => null)
 
     if (!resp.ok) {
-      return res.status(resp.status).json(data)
+      return res.status(resp.status).json(data || { error: 'Error from pet service' })
     }
 
     return res.status(201).json(data)

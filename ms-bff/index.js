@@ -8,7 +8,13 @@ dotenv.config()
 const app = express()
 const PORT = process.env.PORT || 8082
 
-app.use(cors())
+app.use(cors({
+  origin: 'http://localhost:5173',
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Authorization', 'Content-Type'],
+  credentials: true
+}))
+app.options('*', cors())
 app.use(express.json())
 
 app.use('/bff', bffRoutes)

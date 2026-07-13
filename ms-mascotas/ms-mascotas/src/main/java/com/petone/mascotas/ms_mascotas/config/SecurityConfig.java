@@ -29,7 +29,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/mascotas/mis-mascotas").authenticated()
-                .requestMatchers("/api/mascotas/**").permitAll()
+                .requestMatchers("/api/mascotas", "/api/mascotas/**").permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
