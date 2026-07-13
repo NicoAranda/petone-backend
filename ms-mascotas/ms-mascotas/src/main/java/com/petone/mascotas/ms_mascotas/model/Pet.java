@@ -30,6 +30,9 @@ public class Pet {
     private String descripcion;
     private Long usuarioId; // Relación con el microservicio de usuarios
 
+    @Column(nullable = true)
+    private Integer likes = 0;
+
     @Column(length = 10000)
     private String fotoUrl;
 }

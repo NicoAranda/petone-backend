@@ -268,6 +268,46 @@ router.put('/mascotas/:id', async (req, res) => {
   }
 });
 
+router.post('/mascotas/:id/like', async (req, res) => {
+  try {
+    const resp = await fetchWithTimeout(
+      `${PET_SERVICE}/api/mascotas/${req.params.id}/like`,
+      {
+        method: 'POST',
+        headers: forwardHeaders(req)
+      }
+    );
+
+    const data = await resp.json().catch(() => null);
+    if (!resp.ok) return res.status(resp.status).json(data || { error: 'Upstream error' });
+
+    return res.json(data);
+  } catch (err) {
+    console.error('bff POST /mascotas/:id/like error', err?.message || err);
+    return res.status(502).json({ error: 'Error liking mascota' });
+  }
+});
+
+router.delete('/mascotas/:id/like', async (req, res) => {
+  try {
+    const resp = await fetchWithTimeout(
+      `${PET_SERVICE}/api/mascotas/${req.params.id}/like`,
+      {
+        method: 'DELETE',
+        headers: forwardHeaders(req)
+      }
+    );
+
+    const data = await resp.json().catch(() => null);
+    if (!resp.ok) return res.status(resp.status).json(data || { error: 'Upstream error' });
+
+    return res.json(data);
+  } catch (err) {
+    console.error('bff DELETE /mascotas/:id/like error', err?.message || err);
+    return res.status(502).json({ error: 'Error unliking mascota' });
+  }
+});
+
 router.delete('/mascotas/:id', async (req, res) => {
   try {
     const resp = await fetchWithTimeout(

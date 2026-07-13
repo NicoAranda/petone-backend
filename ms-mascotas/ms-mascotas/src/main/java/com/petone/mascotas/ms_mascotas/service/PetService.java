@@ -53,6 +53,19 @@ public class PetService {
         return petRepository.save(pet);
     }
 
+    public Pet incrementLikes(Long id) {
+        Pet pet = viewPetById(id);
+        pet.setLikes(pet.getLikes() == null ? 1 : pet.getLikes() + 1);
+        return petRepository.save(pet);
+    }
+
+    public Pet decrementLikes(Long id) {
+        Pet pet = viewPetById(id);
+        int currentLikes = pet.getLikes() == null ? 0 : pet.getLikes();
+        pet.setLikes(Math.max(0, currentLikes - 1));
+        return petRepository.save(pet);
+    }
+
     public void deletePet(Long id) {
         petRepository.deleteById(id);
     }

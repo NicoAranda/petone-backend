@@ -1,6 +1,7 @@
 package com.petone.mascotas.ms_mascotas.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import java.io.IOException;
 import java.util.Base64;
@@ -81,9 +82,16 @@ public class PetController {
         return "data:" + contentType + ";base64," + base64;
     }
 
+    private boolean esMascotaVisibleEnPerfil(Pet pet) {
+        String estado = pet.getEstado();
+        return estado == null || (!"Perdido".equalsIgnoreCase(estado) && !"Reportado".equalsIgnoreCase(estado));
+    }
+
     @GetMapping
     public ResponseEntity<List<Pet>> listarMascotas(){
-        List<Pet> pets = petService.viewAllPets();
+        List<Pet> pets = petService.viewAllPets().stream()
+                .filter(this::esMascotaVisibleEnPerfil)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(pets);
     }
 
@@ -96,7 +104,9 @@ public class PetController {
     @GetMapping("/usuario/{usuarioId}")
     public ResponseEntity<List<Pet>> listarPorUsuario(@PathVariable Long usuarioId){
         System.out.println("Fetching pets for usuario: " + usuarioId);
-        List<Pet> pets = petService.viewPetsByUsuarioId(usuarioId);
+        List<Pet> pets = petService.viewPetsByUsuarioId(usuarioId).stream()
+                .filter(this::esMascotaVisibleEnPerfil)
+                .collect(Collectors.toList());
         System.out.println("Found " + pets.size() + " pets");
         return ResponseEntity.ok(pets);
     }
@@ -123,6 +133,18 @@ public class PetController {
         @RequestParam String nuevoEstado
     ){
         Pet pet = petService.updateEstado(id, nuevoEstado);
+        return ResponseEntity.ok(pet);
+    }
+
+    @PostMapping("/{id}/like")
+    public ResponseEntity<Pet> darLike(@PathVariable Long id) {
+        Pet pet = petService.incrementLikes(id);
+        return ResponseEntity.ok(pet);
+    }
+
+    @DeleteMapping("/{id}/like")
+    public ResponseEntity<Pet> quitarLike(@PathVariable Long id) {
+        Pet pet = petService.decrementLikes(id);
         return ResponseEntity.ok(pet);
     }
 
