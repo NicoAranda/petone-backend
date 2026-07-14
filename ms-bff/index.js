@@ -15,6 +15,6 @@ app.use('/bff', bffRoutes)
 
 app.get('/health', (req, res) => res.json({ ok: true, service: 'ms-bff' }))
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`ms-bff listening on port ${PORT}`)
 })
